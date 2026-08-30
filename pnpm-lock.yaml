@@ -17,9 +17,6 @@ importers:
       '@remotion/cli':
         specifier: 4.0.518
         version: 4.0.518(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.7.3)
-      '@remotion/gif':
-        specifier: 4.0.518
-        version: 4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/renderer':
         specifier: 4.0.518
         version: 4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -45,6 +42,9 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
+      '@remotion/bundler':
+        specifier: 4.0.518
+        version: 4.0.518(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/node':
         specifier: 22.20.1
         version: 22.20.1
@@ -783,12 +783,6 @@ packages:
     resolution: {integrity: sha512-m9gJuCeI7oUz57slFVk1YBJqXVUUlBwaWalptkiBsoh7EQZbUbzjGotsDaoVCJ0arwNoMJK5cN5BE5asUsEHYg==}
     cpu: [x64]
     os: [win32]
-
-  '@remotion/gif@4.0.518':
-    resolution: {integrity: sha512-cLWw8Ra8wFpxFSdLPgqRelUvM2ohV6F0IjsfSh7nwBD115Y2ZZ4EvfHANUBD8Rj1uhqJ2/l1fg00vp6riabTZQ==}
-    peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
 
   '@remotion/licensing@4.0.518':
     resolution: {integrity: sha512-YoGKkBRlRRQrBvhgckJnUhfoEROTYkTxyPFSNnGMNtgrSgHI+3LM+Fvm538GtwOrBGyD6b/u3CCJt0Xt/Mm54Q==}
@@ -2918,12 +2912,6 @@ snapshots:
 
   '@remotion/compositor-win32-x64-msvc@4.0.518':
     optional: true
-
-  '@remotion/gif@4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-      remotion: 4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
 
   '@remotion/licensing@4.0.518': {}
 

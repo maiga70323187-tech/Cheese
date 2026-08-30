@@ -5,13 +5,13 @@ vidéo rendue par [Remotion](https://www.remotion.dev/), pilotée par une
 charte graphique elle-même validée par [Zod](https://zod.dev/) — jamais de
 couleur ou de style codé en dur dans une composition.
 
-> **Statut** : Checkpoints A + B + C livrés — charte graphique, scénario,
-> conversion NL → JSON via Kimi K2, moteur de scènes avec 7 compositions
-> 2D **et** la scène téléphone en 2.5D (CSS) et en vraie 3D (React Three
-> Fiber + `@remotion/three`), toutes **vérifiées par de vrais rendus
-> Remotion**, pas seulement compilées. Le pipeline de rendu MP4/GIF final
-> et la suite de tests complète arrivent à la Finalisation — voir
-> `ARCHITECTURE.md` pour le détail.
+> **Statut** : projet complet — charte graphique, scénario, conversion
+> NL → JSON via Kimi K2, moteur de scènes avec 7 compositions 2D **et**
+> la scène téléphone en 2.5D (CSS) et en vraie 3D (React Three Fiber +
+> `@remotion/three`), pipeline de rendu MP4/GIF, et suite de tests
+> complète (36 tests, dont des rendus réels automatisés) — voir
+> `ARCHITECTURE.md` pour le détail des décisions et `TROUBLESHOOTING.md`
+> pour les bugs réels trouvés et corrigés en cours de route.
 
 ## Stack
 
@@ -37,11 +37,14 @@ pnpm test           # suite Vitest (schémas, scénario, déterminisme)
 pnpm test:watch     # Vitest en mode watch
 
 pnpm studio         # Remotion Studio (prévisualisation) — VideoVertical/Landscape/Square
-pnpm render:vertical   # rendu MP4 1080x1920 — disponible à partir de la Finalisation
+pnpm render:vertical   # rendu MP4 1080x1920 (scénario phone-app-ad par défaut)
 pnpm render:landscape  # rendu MP4 1920x1080
 pnpm render:square     # rendu MP4 1080x1080
 pnpm render:gif        # export GIF
 ```
+
+Voir `RENDERING.md` pour les options du CLI de rendu (`--scenario`,
+`--theme`, `--out`, ...) et comment rendre un scénario JSON personnalisé.
 
 Pour un contrôle rapide sans passer par le Studio, un rendu image fixe
 réel (pas seulement `tsc`) :
@@ -92,10 +95,24 @@ distant bloque `api.tokenrouter.com` — voir `TROUBLESHOOTING.md#appel-kimi-k2-
 pour tester en dehors de ce sandbox et pour retrouver l'identifiant exact
 du modèle (`KIMI_MODEL`).
 
+## Tests
+
+```bash
+pnpm test
+```
+
+36 tests : validation des schémas (charte, scénario), client Kimi K2
+(fetch simulé, déterministe), PRNG déterministe et données de dashboard,
+compilation TypeScript, **et un rendu réel** de chaque composition
+(`VideoVertical`/`Landscape`/`Square`, dimensions/fps vérifiés) plus un
+contrôle de déterminisme automatisé (deux rendus de la même frame doivent
+produire des octets identiques) — voir `src/remotion/mount.test.ts`.
+
 ## Documentation
 
 - `ARCHITECTURE.md` — architecture, décisions techniques et pourquoi.
 - `DESIGN_SYSTEM.md` — schéma de charte, presets, comment en ajouter une.
-- `SCENES.md` — catalogue des scènes du moteur (à partir du Checkpoint B).
-- `RENDERING.md` — pipeline de rendu MP4/GIF (à partir de la Finalisation).
-- `TROUBLESHOOTING.md` — problèmes connus et solutions.
+- `SCENES.md` — catalogue des scènes du moteur, y compris la scène
+  téléphone 2.5D/3D et comment y brancher un modèle GLB.
+- `RENDERING.md` — pipeline de rendu MP4/GIF, CLI, licences.
+- `TROUBLESHOOTING.md` — problèmes réels rencontrés et leurs solutions.

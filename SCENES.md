@@ -135,9 +135,14 @@ Un rendu `tsc --noEmit` vert ne prouve pas qu'une scène s'affiche
 correctement. Chaque scène de ce catalogue — y compris `PhoneShowcase` et
 `PhoneShowcase3D`, en `vertical` et `landscape` — a été vérifiée par un
 vrai rendu Remotion (`remotion still`, PNG inspecté visuellement), pas
-seulement compilée. Un contrôle de reproductibilité a aussi été fait pour
-chacune : rendre deux fois la même frame produit un fichier strictement
-identique en octets (déterminisme confirmé, pas supposé). La scène 3D a
+seulement compilée. `src/remotion/mount.test.ts` automatise une version
+de ce contrôle (rendu réel de chaque composition + dimensions/fps
+vérifiés) dans `pnpm test`, pour que ça reste vérifié en continu plutôt
+que seulement pendant le développement initial. Un contrôle de
+reproductibilité a aussi été fait, à la fois manuellement et de façon
+automatisée dans ce même fichier de test : rendre deux fois la même frame
+produit un fichier strictement identique en octets (déterminisme
+confirmé, pas supposé). La scène 3D a
 d'ailleurs révélé plusieurs bugs réels (radius de `RoundedBox` dégénéré,
 cadrage caméra très éloigné de la prédiction théorique, `<Html>` de drei
 invisible sous `<ThreeCanvas>`, matériaux `transparent` invisibles) qu'un

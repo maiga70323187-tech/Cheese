@@ -1,9 +1,9 @@
 # Architecture
 
-> Statut : rédigé au fil des étapes. Cette version couvre les Checkpoints A
-> (scaffolding, charte graphique, scénario), B (moteur de scènes,
-> compositions 2D, `Root.tsx`) et C (scène téléphone 2.5D + 3D). Le
-> pipeline de rendu MP4/GIF reste à compléter.
+> Statut : projet complet — Checkpoints A (scaffolding, charte graphique,
+> scénario), B (moteur de scènes, compositions 2D, `Root.tsx`), C (scène
+> téléphone 2.5D + 3D) et Finalisation (pipeline de rendu MP4/GIF, suite
+> de tests, documentation) sont tous livrés.
 
 ## Vue d'ensemble
 
@@ -71,10 +71,12 @@ via une constante importée.
   dupliquerait cette fonction sans l'utiliser réellement — Vite reste une
   dépendance transitive de l'outillage Remotion/Vitest, pas un serveur dev
   que ce projet pilote.
-- **Pas de ffmpeg système requis** : `@remotion/renderer` embarque son
-  propre compositeur ; ffmpeg n'est nécessaire que pour des conversions
-  optionnelles hors du pipeline Remotion (voir `RENDERING.md` et
-  `TROUBLESHOOTING.md`).
+- **Pas de ffmpeg système requis** : `@remotion/renderer` encode/mux via
+  son propre compositeur natif (`@remotion/compositor-linux-x64-gnu`,
+  installé comme dépendance npm normale) ; vérifié par un vrai rendu MP4
+  complet à la Finalisation, sans `ffmpeg` installé sur le système. ffmpeg
+  ne serait utile que pour des conversions hors pipeline Remotion (voir
+  `RENDERING.md` et `TROUBLESHOOTING.md`).
 - **Navigateur : réutiliser le Chromium préinstallé, pas le téléchargement
   de Remotion** : le premier rendu réel (Checkpoint B) a échoué avec un
   `403` — cet environnement bloque `remotion.media` (allowlist réseau).
@@ -126,26 +128,36 @@ complet dans `SCENES.md`. Décisions notables :
   emplacement de remplacement clair est documenté dans `SCENES.md` pour
   brancher un vrai modèle plus tard, sans toucher caméra/lumières/animation.
 
-## Méthode de vérification (Checkpoint B et C)
+## Pipeline de rendu (Finalisation)
+
+`src/cli/render.ts` (voir `RENDERING.md`) valide le scénario, force le
+format à celui de la composition choisie, et appelle `remotion render`
+(donc `remotion.config.ts` s'applique). Un vrai rendu MP4 complet
+(1080×1920, 12s, 360 frames) et un GIF de démonstration ont été produits
+et vérifiés à cette étape — pas seulement lancés sans erreur : durée,
+codec et dimensions confirmés via `getVideoMetadata()` de
+`@remotion/renderer` pour le MP4, et compte de frames réel (comptage des
+blocs `Graphic Control Extension`) pour le GIF. Un vrai bug a été trouvé
+ici aussi : `Config.setConcurrency(undefined)` (Checkpoint A) plantait
+tout rendu multi-frame avec `RangeError: Invalid array length` — voir
+`TROUBLESHOOTING.md`.
+
+## Méthode de vérification (tous les checkpoints)
 
 Un `tsc --noEmit` vert prouve que le code type-check, pas qu'un rendu est
-correct. Chaque scène — y compris la 3D, en `vertical` et `landscape` — a
-donc aussi été vérifiée par un vrai rendu Remotion (`remotion still`, PNG
-inspecté) — pas seulement compilée. Détail dans `SCENES.md`. Plusieurs
-vrais bugs runtime ont été trouvés cette façon-là qu'un typecheck seul
-n'aurait pas révélés : la version de zod attendue par Remotion, le
-téléchargement de navigateur bloqué par le réseau (Checkpoint B), un
-radius de `RoundedBox` dégénéré, `<Html>` de drei invisible sous
-`<ThreeCanvas>`, des matériaux `transparent` invisibles, et un cadrage
-caméra très éloigné de sa prédiction théorique (Checkpoint C) — voir
-`TROUBLESHOOTING.md` pour chacun. Un contrôle de reproductibilité binaire
-(deux rendus de la même frame → fichiers identiques en octets) confirme
-aussi le déterminisme de chaque scène, plutôt que de le supposer — y
-compris pour la scène 3D.
-
-## Prochaines sections (finalisation)
-
-- Pipeline de rendu MP4/GIF et CLI (`src/cli/render.ts`).
-- Tests de montage de toutes les compositions + test de déterminisme
-  automatisé (au-delà du contrôle manuel fait aux Checkpoints B et C).
-- Documentation complète (`RENDERING.md`).
+correct. Chaque scène — y compris la 3D, en `vertical` et `landscape` —
+et le pipeline de rendu final ont donc aussi été vérifiés par de vrais
+rendus Remotion (`remotion still` pendant le développement,
+`src/remotion/mount.test.ts` de façon automatisée, un rendu MP4/GIF
+complet à la Finalisation) — jamais seulement compilés. Détail dans
+`SCENES.md`. Plusieurs vrais bugs runtime ont été trouvés cette façon-là
+qu'un typecheck seul n'aurait pas révélés : la version de zod attendue
+par Remotion, le téléchargement de navigateur bloqué par le réseau
+(Checkpoint B), un radius de `RoundedBox` dégénéré, `<Html>` de drei
+invisible sous `<ThreeCanvas>`, des matériaux `transparent` invisibles,
+un cadrage caméra très éloigné de sa prédiction théorique (Checkpoint C),
+et `Config.setConcurrency(undefined)` qui cassait tout rendu multi-frame
+(Finalisation) — voir `TROUBLESHOOTING.md` pour chacun. Le contrôle de
+déterminisme (deux rendus de la même frame → fichiers identiques en
+octets) est automatisé dans `src/remotion/mount.test.ts`, plutôt que
+seulement vérifié manuellement.

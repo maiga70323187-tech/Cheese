@@ -14,10 +14,24 @@ persiste après un `pnpm install`, relancer `pnpm approve-builds`.
 
 ## ffmpeg absent du système
 
-`@remotion/renderer` embarque son propre compositeur et ne nécessite pas
-de `ffmpeg` système pour le rendu MP4/GIF standard. Un `ffmpeg` système
-n'est utile que pour des conversions hors pipeline Remotion (voir
-`RENDERING.md`, à compléter à l'étape Finalisation).
+Vérifié à l'étape Finalisation : un rendu MP4 complet fonctionne dans cet
+environnement sans `ffmpeg` système installé. `@remotion/renderer` encode
+et mux directement via `@remotion/compositor-linux-x64-gnu` — un binaire
+natif Rust installé comme dépendance npm normale (pas téléchargé depuis
+`remotion.media`), donc pas concerné par la restriction réseau qui bloque
+le Chrome Headless Shell. Un `ffmpeg` système reste utile uniquement pour
+des conversions hors pipeline Remotion (voir `RENDERING.md`).
+
+## `remotion render` plante avec `RangeError: Invalid array length` (`Concurrency NaNx`)
+
+Trouvé au premier vrai rendu MP4 de l'étape Finalisation.
+`remotion.config.ts` appelait `Config.setConcurrency(undefined)` (intention
+: "laisser la valeur par défaut"). En réalité, passer explicitement
+`undefined` court-circuite la résolution interne de la concurrence par
+défaut de Remotion et produit `NaN`, qui casse `new Array(NaN)` dans le
+pool de rendu. La ligne a été supprimée entièrement — ne pas appeler
+`Config.setConcurrency()` du tout est la bonne façon de laisser Remotion
+choisir sa valeur par défaut.
 
 ## `KIMI_API_KEY manquant`
 

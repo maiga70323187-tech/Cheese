@@ -3,7 +3,6 @@ import { Config } from "@remotion/cli/config";
 
 Config.setVideoImageFormat("jpeg");
 Config.setOverwriteOutput(true);
-Config.setConcurrency(undefined);
 Config.setChromiumOpenGlRenderer("angle");
 
 // This environment blocks Remotion's own Chrome Headless Shell download

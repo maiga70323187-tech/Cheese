@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@remotion/cli": "4.0.518",
-    "@remotion/gif": "4.0.518",
     "@remotion/renderer": "4.0.518",
     "@remotion/three": "4.0.518",
     "@remotion/zod-types": "4.0.518",
@@ -33,6 +32,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@remotion/bundler": "4.0.518",
     "@types/node": "22.20.1",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.5",
