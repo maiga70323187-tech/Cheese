@@ -131,7 +131,7 @@ export function parseScenario(data: unknown): Scenario {
   return scenarioSchema.parse(data);
 }
 
-export function safeParseScenario(data: unknown): z.SafeParseReturnType<unknown, Scenario> {
+export function safeParseScenario(data: unknown): z.ZodSafeParseResult<Scenario> {
   return scenarioSchema.safeParse(data);
 }
 

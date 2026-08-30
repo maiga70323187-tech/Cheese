@@ -98,6 +98,6 @@ export function parseBrandTheme(data: unknown): BrandTheme {
   return brandThemeSchema.parse(data);
 }
 
-export function safeParseBrandTheme(data: unknown): z.SafeParseReturnType<unknown, BrandTheme> {
+export function safeParseBrandTheme(data: unknown): z.ZodSafeParseResult<BrandTheme> {
   return brandThemeSchema.safeParse(data);
 }

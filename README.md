@@ -5,10 +5,12 @@ vidéo rendue par [Remotion](https://www.remotion.dev/), pilotée par une
 charte graphique elle-même validée par [Zod](https://zod.dev/) — jamais de
 couleur ou de style codé en dur dans une composition.
 
-> **Statut** : Checkpoint A livré (scaffolding, charte graphique,
-> scénario, conversion NL → JSON via Kimi K2). Le moteur de scènes, les
-> compositions 2D/2.5D/3D et le pipeline de rendu MP4/GIF arrivent aux
-> checkpoints suivants — voir `ARCHITECTURE.md` pour le détail.
+> **Statut** : Checkpoints A + B livrés — charte graphique, scénario,
+> conversion NL → JSON via Kimi K2, **moteur de scènes et 7 compositions 2D
+> vérifiées par de vrais rendus Remotion** (`Intro`, `TextReveal`,
+> `DashboardShowcase`, `FeatureCards`, `Statistic`, `CallToAction`,
+> `Outro`). La scène téléphone (2.5D/3D) et le pipeline MP4/GIF arrivent au
+> prochain checkpoint — voir `ARCHITECTURE.md` pour le détail.
 
 ## Stack
 
@@ -33,12 +35,23 @@ pnpm typecheck      # tsc --noEmit sur tout le projet
 pnpm test           # suite Vitest (schémas, scénario, déterminisme)
 pnpm test:watch     # Vitest en mode watch
 
-pnpm studio         # Remotion Studio (prévisualisation) — disponible à partir du Checkpoint B
+pnpm studio         # Remotion Studio (prévisualisation) — VideoVertical/Landscape/Square
 pnpm render:vertical   # rendu MP4 1080x1920 — disponible à partir de la Finalisation
 pnpm render:landscape  # rendu MP4 1920x1080
 pnpm render:square     # rendu MP4 1080x1080
 pnpm render:gif        # export GIF
 ```
+
+Pour un contrôle rapide sans passer par le Studio, un rendu image fixe
+réel (pas seulement `tsc`) :
+
+```bash
+mkdir -p out
+pnpm exec remotion still src/remotion/index.ts VideoVertical out/check.png --frame=30
+```
+
+Voir `TROUBLESHOOTING.md` si le navigateur headless de Remotion ne peut
+pas se télécharger (environnements réseau restreints).
 
 ## Charte graphique (données, pas de code en dur)
 

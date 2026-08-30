@@ -51,5 +51,45 @@ Pour tester réellement :
    `curl -H "Authorization: Bearer $KIMI_API_KEY" $KIMI_API_BASE_URL/models`
    puis passer l'identifiant trouvé via `KIMI_MODEL`.
 
-> D'autres entrées seront ajoutées au fil des checkpoints (Remotion Studio,
-> rendu 3D, GLB, GIF).
+## `remotion compositions` / `remotion studio` : "Version mismatch ... zod"
+
+Remotion 4.0.518 embarque `@remotion/zod-types`, qui exige une version
+**exacte** de zod (`4.4.3` pour cette version de Remotion — pas 3.x, pas
+4.5.x). Si `package.json` pointe une autre version, `remotion` l'affiche
+au démarrage (`Version mismatch: zod: installed X, required Y`). Fixer la
+version exacte annoncée par le message et relancer `pnpm install`. Ne pas
+se fier au "latest" npm : `npm view zod version` peut être plus récent que
+ce que Remotion attend.
+
+## Rendu bloqué sur "Downloading Chrome Headless Shell" (403 `remotion.media`)
+
+Par défaut, `@remotion/renderer` télécharge son propre "Chrome Headless
+Shell" au premier rendu. Dans un environnement dont le réseau sortant est
+filtré (comme cette session), ce téléchargement échoue avec un `403 Host
+not in allowlist: remotion.media`. `remotion.config.ts` de ce projet
+contourne ça avec `Config.setBrowserExecutable(...)`, pointé par défaut
+vers le Chrome Headless Shell déjà préinstallé pour Playwright
+(`/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`).
+Sur une machine sans ce chemin, soit laisser Remotion télécharger son
+propre navigateur (réseau ouvert), soit définir
+`REMOTION_BROWSER_EXECUTABLE=/chemin/vers/un/chromium` avant de lancer
+`pnpm studio` / `pnpm render:*`.
+
+## Vérifier qu'un rendu est vraiment correct (pas seulement qu'il compile)
+
+`pnpm typecheck` ne prouve rien sur le rendu visuel. Pour vérifier une
+scène réellement :
+
+```bash
+mkdir -p out
+pnpm exec remotion still src/remotion/index.ts VideoVertical out/check.png --frame=30
+```
+
+Pour tester un scénario différent de celui par défaut (`phone-app-ad`),
+passer `--props=chemin/vers/scenario.json` avec `{"scenario": {...}}`
+conforme à `scenarioSchema`. Pour vérifier le déterminisme, rendre deux
+fois la même frame et comparer les octets (`cmp fichier1.png fichier2.png`)
+— un rendu déterministe produit un fichier strictement identique.
+
+> D'autres entrées seront ajoutées au fil des checkpoints (rendu 3D, GLB,
+> pipeline MP4/GIF).

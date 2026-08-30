@@ -1,8 +1,9 @@
 # Architecture
 
-> Statut : rédigé au fil des étapes. Cette version couvre le Checkpoint A
-> (scaffolding, charte graphique, scénario). Les sections moteur de scènes,
-> rendu et 3D seront complétées aux checkpoints suivants.
+> Statut : rédigé au fil des étapes. Cette version couvre les Checkpoints A
+> (scaffolding, charte graphique, scénario) et B (moteur de scènes,
+> compositions 2D, `Root.tsx`). Rendu 3D/2.5D et pipeline MP4/GIF restent à
+> compléter.
 
 ## Vue d'ensemble
 
@@ -56,11 +57,15 @@ via une constante importée.
   l'écosystème autour de Remotion, `tsx`, `@remotion/zod-types` et Vitest a
   été testé contre TS 5.x. On repasse à une 7.x quand Remotion l'annoncera
   supportée explicitiement.
-- **zod 3.25.x plutôt que zod 4.5.x** : `@remotion/zod-types` (utilisé par
-  Remotion Studio pour l'éditeur de props typé) est construit et testé
-  contre l'API zod v3. zod v4 change des détails internes (`_def`, parsing)
-  qui peuvent casser l'introspection faite par Remotion. On réévaluera zod
-  4 quand `@remotion/zod-types` l'annoncera supporté.
+- **zod 4.4.3, jamais un autre 4.x, jamais 3.x** : `remotion compositions`
+  (Checkpoint B) a d'abord signalé un avertissement `Version mismatch` avec
+  zod 3.25.x — Remotion 4.0.518 exige exactement `zod@4.4.3` en interne
+  (`@remotion/zod-types`). C'est l'inverse de ce que Checkpoint A supposait
+  (zod v3 par prudence) : vérifié ici en le lançant réellement plutôt que
+  deviné. Ne pas monter vers zod 4.5.x (dernier `latest` npm) tant que
+  Remotion n'annonce pas le supporter — même méthode qu'avec TypeScript
+  ci-dessus, la version "la plus récente publiée" n'est pas forcément celle
+  attendue par le framework.
 - **Pas de Vite séparé** : Remotion Studio (`remotion studio`) est déjà le
   serveur de prévisualisation (webpack interne à Remotion). Ajouter Vite
   dupliquerait cette fonction sans l'utiliser réellement — Vite reste une
@@ -70,6 +75,14 @@ via une constante importée.
   propre compositeur ; ffmpeg n'est nécessaire que pour des conversions
   optionnelles hors du pipeline Remotion (voir `RENDERING.md` et
   `TROUBLESHOOTING.md`).
+- **Navigateur : réutiliser le Chromium préinstallé, pas le téléchargement
+  de Remotion** : le premier rendu réel (Checkpoint B) a échoué avec un
+  `403` — cet environnement bloque `remotion.media` (allowlist réseau).
+  `remotion.config.ts` pointe `Config.setBrowserExecutable(...)` vers le
+  Chrome Headless Shell déjà installé pour Playwright
+  (`/opt/pw-browsers/chromium_headless_shell-1194/...`), avec un
+  `REMOTION_BROWSER_EXECUTABLE` pour l'écraser ailleurs. Voir
+  `TROUBLESHOOTING.md`.
 - **Kimi K2 comme fournisseur NL → JSON** : `src/scenario/brief-to-scenario.ts`
   expose l'interface `BriefToScenarioClient` (une seule méthode `convert`).
   `KimiBriefToScenarioClient` est l'implémentation réelle (appel HTTP
@@ -88,11 +101,22 @@ seedé, ni d'état réseau. L'appel à Kimi K2 (étape NL → JSON) est en dehor
 de cette contrainte : c'est une étape de préparation, exécutée une fois,
 avant que le rendu déterministe ne commence.
 
-## Prochaines sections (Checkpoints B/C/finalisation)
+## Méthode de vérification (Checkpoint B)
 
-- Moteur de scènes : registre de compositions, `SceneSequence`, contexte de
-  thème.
-- Fond premium : halos, particules, vignette, grain — implémentation et
-  test de lisibilité.
-- Scène 2.5D et scène 3D (React Three Fiber) du téléphone.
-- Pipeline de rendu MP4/GIF et CLI.
+Un `tsc --noEmit` vert prouve que le code type-check, pas qu'un rendu est
+correct. Chaque scène a donc aussi été vérifiée par un vrai rendu Remotion
+(`remotion still`, PNG inspecté) — pas seulement compilée. Détail dans
+`SCENES.md`. Deux vrais bugs runtime ont été trouvés cette façon-là (voir
+ci-dessus) qu'un typecheck seul n'aurait pas révélés : la version de zod
+attendue par Remotion, et le téléchargement de navigateur bloqué par le
+réseau. Un contrôle de reproductibilité binaire (deux rendus de la même
+frame → fichiers identiques en octets) confirme aussi le déterminisme,
+plutôt que de le supposer.
+
+## Prochaines sections (Checkpoint C / finalisation)
+
+- Scène 2.5D et scène 3D (React Three Fiber) du téléphone — `phone-showcase`
+  n'est encore qu'un placeholder (`src/engine/scenes/PhonePlaceholder.tsx`).
+- Pipeline de rendu MP4/GIF et CLI (`src/cli/render.ts`).
+- Tests de montage de toutes les compositions + test de déterminisme
+  automatisé (au-delà du contrôle manuel fait au Checkpoint B).
