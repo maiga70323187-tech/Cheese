@@ -70,6 +70,14 @@ Sans `KIMI_API_KEY`, `convert()` lève une `BriefToScenarioError` explicite
 n'appellent jamais le réseau réel : ils injectent un `fetchImpl` simulé
 pour rester déterministes.
 
+Un `.env` local (non commité, voir `.gitignore`) est déjà configuré pour
+ce projet avec `KIMI_API_KEY` et `KIMI_API_BASE_URL=https://api.tokenrouter.com/v1`
+(fournisseur tiers OpenAI-compatible vers Kimi K2). **Non testé en conditions
+réelles depuis cette session** : la politique réseau de cet environnement
+distant bloque `api.tokenrouter.com` — voir `TROUBLESHOOTING.md#appel-kimi-k2-bloqué-dans-une-session-claude-code-on-the-web`
+pour tester en dehors de ce sandbox et pour retrouver l'identifiant exact
+du modèle (`KIMI_MODEL`).
+
 ## Documentation
 
 - `ARCHITECTURE.md` — architecture, décisions techniques et pourquoi.

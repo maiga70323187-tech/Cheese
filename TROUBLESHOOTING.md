@@ -26,5 +26,30 @@ configurée (voir `README.md#conversion-langage-naturel--scénario-kimi-k2`).
 C'est volontaire : pas d'appel réseau silencieux ni de scénario par défaut
 qui masquerait l'absence de configuration.
 
+## Appel Kimi K2 bloqué dans une session Claude Code on the web
+
+Cette session tourne dans un environnement distant dont le trafic sortant
+passe par un proxy avec une liste d'hôtes autorisés. Un fournisseur tiers
+comme `api.tokenrouter.com` (routeur OpenAI-compatible vers Kimi K2) n'y
+figure pas par défaut, ce qui se traduit par un `403` au niveau du tunnel
+CONNECT — pas une clé invalide. C'est pourquoi la conversion Kimi K2 n'a
+pu être testée qu'unitairement (fetch simulé) et non en conditions réelles
+depuis cette session.
+
+Pour tester réellement :
+
+1. Cloner le repo sur une machine (ou un environnement Claude Code)
+   sans cette restriction réseau, `pnpm install`, définir `KIMI_API_KEY` /
+   `KIMI_API_BASE_URL`, puis exécuter un script qui appelle
+   `KimiBriefToScenarioClient.convert(...)`.
+2. Ou élargir la politique réseau de cet environnement pour autoriser
+   `api.tokenrouter.com` (Environnements → paramètres réseau, voir la
+   documentation Claude Code on the web).
+3. Pour trouver l'identifiant exact du modèle Kimi K2 exposé par
+   `tokenrouter.com` (le nom peut différer de `kimi-k2-0711-preview`,
+   la valeur par défaut de ce projet), lister les modèles disponibles :
+   `curl -H "Authorization: Bearer $KIMI_API_KEY" $KIMI_API_BASE_URL/models`
+   puis passer l'identifiant trouvé via `KIMI_MODEL`.
+
 > D'autres entrées seront ajoutées au fil des checkpoints (Remotion Studio,
 > rendu 3D, GLB, GIF).
