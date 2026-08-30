@@ -8,7 +8,8 @@ import { FeatureCards } from "./scenes/FeatureCards";
 import { Statistic } from "./scenes/Statistic";
 import { CallToAction } from "./scenes/CallToAction";
 import { Outro } from "./scenes/Outro";
-import { PhonePlaceholder } from "./scenes/PhonePlaceholder";
+import { PhoneShowcase } from "./scenes/PhoneShowcase";
+import { PhoneShowcase3D } from "./scenes/PhoneShowcase3D";
 
 /** The single place mapping a scenario scene type to its React component. */
 export function renderScene(scene: Scene, theme: BrandTheme): React.ReactElement {
@@ -38,7 +39,9 @@ export function renderScene(scene: Scene, theme: BrandTheme): React.ReactElement
     case "outro":
       return React.createElement(Outro, { theme, title: scene.title, logoText: scene.logoText });
     case "phone-showcase":
-      return React.createElement(PhonePlaceholder, { theme });
+      return scene.render === "3d"
+        ? React.createElement(PhoneShowcase3D, { theme, dashboardVariant: scene.dashboardVariant })
+        : React.createElement(PhoneShowcase, { theme, dashboardVariant: scene.dashboardVariant });
     default: {
       const exhaustiveCheck: never = scene;
       throw new Error(`Type de scène non géré: ${JSON.stringify(exhaustiveCheck)}`);

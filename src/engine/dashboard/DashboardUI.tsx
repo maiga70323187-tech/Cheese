@@ -11,18 +11,35 @@ export interface DashboardUIProps {
   metrics?: DashboardMetric[];
   /** Frame at which this dashboard's own entrance animation starts (relative to its own Sequence). */
   startFrame?: number;
+  /** Cap how many metric tiles render — a phone screen is much narrower than a full-screen dashboard, so 3 tiles truncate unreadably there; the phone scenes pass 2. */
+  maxMetrics?: number;
+}
+
+export interface DashboardUIPresentationProps extends Omit<DashboardUIProps, "startFrame"> {
+  /** Local frame (already offset), passed in rather than read via `useCurrentFrame()`. */
+  frame: number;
 }
 
 /**
- * Self-contained dashboard interface, sized entirely in `em` so it scales
- * cleanly whether it fills the screen (DashboardShowcase scene) or is
- * projected onto a phone screen (PhoneShowcase, checkpoint C) — the caller
- * only sets `fontSize` on a wrapping element.
+ * Pure rendering half of the dashboard — takes `frame` as a prop instead of
+ * calling `useCurrentFrame()` itself. `PhoneShowcase3D` renders this
+ * directly (with a frame value read in the R3F tree, where the hook does
+ * work) because `useCurrentFrame()` throws when called from inside drei's
+ * `<Html>`: `<Html>` portals its children out of the R3F fiber tree that
+ * `@remotion/three` bridges Remotion's context into, back into a plain
+ * `ReactDOM.createPortal` tree that never receives that context. See
+ * TROUBLESHOOTING.md.
  */
-export const DashboardUI: React.FC<DashboardUIProps> = ({ theme, variant, title, metrics, startFrame = 0 }) => {
-  const frame = useCurrentFrame();
-  const local = Math.max(0, frame - startFrame);
+export const DashboardUIPresentation: React.FC<DashboardUIPresentationProps> = ({
+  theme,
+  variant,
+  title,
+  metrics,
+  maxMetrics,
+  frame: local,
+}) => {
   const preset = resolveDashboardPreset(variant, { title, metrics });
+  const visibleMetrics = maxMetrics ? preset.metrics.slice(0, maxMetrics) : preset.metrics;
   const cardIn = interpolate(local, [0, 18], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
@@ -55,7 +72,7 @@ export const DashboardUI: React.FC<DashboardUIProps> = ({ theme, variant, title,
       </div>
 
       <div style={{ display: "flex", gap: "0.6em" }}>
-        {preset.metrics.map((metric, i) => {
+        {visibleMetrics.map((metric, i) => {
           const tileIn = interpolate(local, [8 + i * 6, 8 + i * 6 + 14], [0, 1], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
@@ -64,18 +81,39 @@ export const DashboardUI: React.FC<DashboardUIProps> = ({ theme, variant, title,
             <div
               key={metric.label}
               style={{
-                flex: 1,
+                flex: "1 1 0",
+                minWidth: 0,
                 background: theme.colors.backgroundSecondary ?? theme.colors.background,
                 borderRadius: theme.radius.small,
                 padding: "0.5em",
                 opacity: tileIn,
                 transform: `scale(${interpolate(tileIn, [0, 1], [0.85, 1])})`,
+                boxSizing: "border-box",
               }}
             >
-              <div style={{ fontSize: "0.85em", color: theme.colors.textMuted ?? theme.colors.text }}>
+              <div
+                style={{
+                  fontSize: "0.78em",
+                  color: theme.colors.textMuted ?? theme.colors.text,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
                 {metric.label}
               </div>
-              <div style={{ fontSize: "1.1em", fontWeight: 700, color: theme.colors.primary }}>{metric.value}</div>
+              <div
+                style={{
+                  fontSize: "1.05em",
+                  fontWeight: 700,
+                  color: theme.colors.primary,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {metric.value}
+              </div>
             </div>
           );
         })}
@@ -110,4 +148,14 @@ export const DashboardUI: React.FC<DashboardUIProps> = ({ theme, variant, title,
       </div>
     </div>
   );
+};
+
+/**
+ * Hook-driven wrapper for normal (plain DOM) usage — every 2D scene uses
+ * this. Reads the frame itself, then delegates to the pure presentation
+ * component above.
+ */
+export const DashboardUI: React.FC<DashboardUIProps> = ({ startFrame = 0, ...rest }) => {
+  const frame = useCurrentFrame();
+  return <DashboardUIPresentation {...rest} frame={Math.max(0, frame - startFrame)} />;
 };

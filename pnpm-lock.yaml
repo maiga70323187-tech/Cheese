@@ -23,6 +23,9 @@ importers:
       '@remotion/renderer':
         specifier: 4.0.518
         version: 4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@remotion/three':
+        specifier: 4.0.518
+        version: 4.0.518(@react-three/fiber@9.7.0(@types/react@19.2.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(remotion@4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(three@0.185.1)
       '@remotion/zod-types':
         specifier: 4.0.518
         version: 4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -837,6 +840,15 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
+
+  '@remotion/three@4.0.518':
+    resolution: {integrity: sha512-9U3fkHzCzacM2TfTk8q3ZG5++2iLkhUyqnc/0SwUgWk/JwqmgP9s5aoodf9pG82Eq4RZcARUJiLvDY0bicEmtQ==}
+    peerDependencies:
+      '@react-three/fiber': '>=8.0.0'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+      remotion: 4.0.518
+      three: '>=0.137.0'
 
   '@remotion/timeline-utils@4.0.518':
     resolution: {integrity: sha512-qyz3VQ7JjBipURhhOsqrPfYpy6L2xqavpc9EZVBM/t0YjFMUuocqUYj5vPly8pTZsdA/18hqNy80aw744/2GqQ==}
@@ -3051,6 +3063,14 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+
+  '@remotion/three@4.0.518(@react-three/fiber@9.7.0(@types/react@19.2.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(remotion@4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(three@0.185.1)':
+    dependencies:
+      '@react-three/fiber': 9.7.0(@types/react@19.2.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      remotion: 4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      three: 0.185.1
 
   '@remotion/timeline-utils@4.0.518(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:

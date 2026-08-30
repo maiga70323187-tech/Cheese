@@ -1,9 +1,9 @@
 # Architecture
 
 > Statut : rédigé au fil des étapes. Cette version couvre les Checkpoints A
-> (scaffolding, charte graphique, scénario) et B (moteur de scènes,
-> compositions 2D, `Root.tsx`). Rendu 3D/2.5D et pipeline MP4/GIF restent à
-> compléter.
+> (scaffolding, charte graphique, scénario), B (moteur de scènes,
+> compositions 2D, `Root.tsx`) et C (scène téléphone 2.5D + 3D). Le
+> pipeline de rendu MP4/GIF reste à compléter.
 
 ## Vue d'ensemble
 
@@ -101,22 +101,51 @@ seedé, ni d'état réseau. L'appel à Kimi K2 (étape NL → JSON) est en dehor
 de cette contrainte : c'est une étape de préparation, exécutée une fois,
 avant que le rendu déterministe ne commence.
 
-## Méthode de vérification (Checkpoint B)
+## Scène téléphone 2.5D + 3D (Checkpoint C)
+
+`phone-showcase` route vers `PhoneShowcase` (2.5D, CSS/DOM pur) ou
+`PhoneShowcase3D` (3D, React Three Fiber) selon `scene.render`. Détail
+complet dans `SCENES.md`. Décisions notables :
+
+- **`@remotion/three`'s `<ThreeCanvas>`, jamais le `<Canvas>` brut de
+  R3F** : synchronise le rendu WebGL sur `useCurrentFrame()` plutôt que
+  `requestAnimationFrame`, seule façon d'obtenir un rendu 3D déterministe
+  frame par frame avec Remotion.
+- **Pas de `<Html>` (drei) pour projeter du DOM sur l'écran 3D** :
+  confirmé cassé dans ce pipeline (portale hors de l'arbre React que
+  `ThreeCanvas` synchronise) — l'écran 3D réimplémente le tableau de bord
+  en géométrie Three.js native. Voir `TROUBLESHOOTING.md`.
+- **Pas de `<Text>` (drei/troika) sur l'écran 3D** : télécharge une police
+  par défaut depuis un CDN externe, contraire au principe "aucune
+  dépendance réseau au rendu" déjà appliqué à l'éclairage.
+- **Pas de `<Environment>`/HDRI** : même principe — l'éclairage studio de
+  `Phone3DScene` est entièrement procédural (`ambientLight` +
+  `hemisphereLight` + `directionalLight` × 2 + `pointLight` teintée par
+  `theme.colors.primary`), aucun asset à télécharger.
+- **Téléphone procédural (`RoundedBox` + primitives), pas de GLB** : un
+  emplacement de remplacement clair est documenté dans `SCENES.md` pour
+  brancher un vrai modèle plus tard, sans toucher caméra/lumières/animation.
+
+## Méthode de vérification (Checkpoint B et C)
 
 Un `tsc --noEmit` vert prouve que le code type-check, pas qu'un rendu est
-correct. Chaque scène a donc aussi été vérifiée par un vrai rendu Remotion
-(`remotion still`, PNG inspecté) — pas seulement compilée. Détail dans
-`SCENES.md`. Deux vrais bugs runtime ont été trouvés cette façon-là (voir
-ci-dessus) qu'un typecheck seul n'aurait pas révélés : la version de zod
-attendue par Remotion, et le téléchargement de navigateur bloqué par le
-réseau. Un contrôle de reproductibilité binaire (deux rendus de la même
-frame → fichiers identiques en octets) confirme aussi le déterminisme,
-plutôt que de le supposer.
+correct. Chaque scène — y compris la 3D, en `vertical` et `landscape` — a
+donc aussi été vérifiée par un vrai rendu Remotion (`remotion still`, PNG
+inspecté) — pas seulement compilée. Détail dans `SCENES.md`. Plusieurs
+vrais bugs runtime ont été trouvés cette façon-là qu'un typecheck seul
+n'aurait pas révélés : la version de zod attendue par Remotion, le
+téléchargement de navigateur bloqué par le réseau (Checkpoint B), un
+radius de `RoundedBox` dégénéré, `<Html>` de drei invisible sous
+`<ThreeCanvas>`, des matériaux `transparent` invisibles, et un cadrage
+caméra très éloigné de sa prédiction théorique (Checkpoint C) — voir
+`TROUBLESHOOTING.md` pour chacun. Un contrôle de reproductibilité binaire
+(deux rendus de la même frame → fichiers identiques en octets) confirme
+aussi le déterminisme de chaque scène, plutôt que de le supposer — y
+compris pour la scène 3D.
 
-## Prochaines sections (Checkpoint C / finalisation)
+## Prochaines sections (finalisation)
 
-- Scène 2.5D et scène 3D (React Three Fiber) du téléphone — `phone-showcase`
-  n'est encore qu'un placeholder (`src/engine/scenes/PhonePlaceholder.tsx`).
 - Pipeline de rendu MP4/GIF et CLI (`src/cli/render.ts`).
 - Tests de montage de toutes les compositions + test de déterminisme
-  automatisé (au-delà du contrôle manuel fait au Checkpoint B).
+  automatisé (au-delà du contrôle manuel fait aux Checkpoints B et C).
+- Documentation complète (`RENDERING.md`).

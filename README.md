@@ -5,12 +5,13 @@ vidéo rendue par [Remotion](https://www.remotion.dev/), pilotée par une
 charte graphique elle-même validée par [Zod](https://zod.dev/) — jamais de
 couleur ou de style codé en dur dans une composition.
 
-> **Statut** : Checkpoints A + B livrés — charte graphique, scénario,
-> conversion NL → JSON via Kimi K2, **moteur de scènes et 7 compositions 2D
-> vérifiées par de vrais rendus Remotion** (`Intro`, `TextReveal`,
-> `DashboardShowcase`, `FeatureCards`, `Statistic`, `CallToAction`,
-> `Outro`). La scène téléphone (2.5D/3D) et le pipeline MP4/GIF arrivent au
-> prochain checkpoint — voir `ARCHITECTURE.md` pour le détail.
+> **Statut** : Checkpoints A + B + C livrés — charte graphique, scénario,
+> conversion NL → JSON via Kimi K2, moteur de scènes avec 7 compositions
+> 2D **et** la scène téléphone en 2.5D (CSS) et en vraie 3D (React Three
+> Fiber + `@remotion/three`), toutes **vérifiées par de vrais rendus
+> Remotion**, pas seulement compilées. Le pipeline de rendu MP4/GIF final
+> et la suite de tests complète arrivent à la Finalisation — voir
+> `ARCHITECTURE.md` pour le détail.
 
 ## Stack
 
