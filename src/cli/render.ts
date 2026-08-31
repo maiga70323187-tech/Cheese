@@ -5,6 +5,7 @@ import { parseArgs } from "node:util";
 import { spawnSync } from "node:child_process";
 import { scenarioSchema, type VideoFormat } from "../scenario/schema";
 import { phoneAppAdScenario } from "../scenario/examples/phone-app-ad";
+import { getTemplate, listTemplates } from "../templates/index";
 
 const COMPOSITION_IDS = ["VideoVertical", "VideoLandscape", "VideoSquare"] as const;
 type CompositionId = (typeof COMPOSITION_IDS)[number];
@@ -28,6 +29,8 @@ Options:
   --composition <id>   VideoVertical | VideoLandscape | VideoSquare (défaut: VideoVertical)
   --scenario <path>    Chemin vers un fichier JSON { "scenario": {...} } conforme à scenarioSchema
                         (défaut: le scénario de référence phone-app-ad)
+  --template <id>      Part d'un template de la bibliothèque au lieu d'un fichier
+                        (${listTemplates().map((t) => t.id).join(", ")})
   --theme <themeId>     Force scenario.themeId (ex: luxury-dark, premium-tech, minimal-light, editorial, vibrant-startup)
   --out <path>          Chemin de sortie (défaut: out/<composition>.<mp4|gif>)
   --gif                 Exporte un GIF (codec gif) au lieu d'un MP4 (codec h264)
@@ -39,6 +42,7 @@ const { values } = parseArgs({
   options: {
     composition: { type: "string", default: "VideoVertical" },
     scenario: { type: "string" },
+    template: { type: "string" },
     theme: { type: "string" },
     out: { type: "string" },
     gif: { type: "boolean", default: false },
@@ -57,8 +61,18 @@ if (!COMPOSITION_IDS.includes(compositionId as CompositionId)) {
 }
 const format = COMPOSITION_TO_FORMAT[compositionId as CompositionId];
 
+if (values.scenario && values.template) {
+  fail("Utilise --scenario OU --template, pas les deux.");
+}
+
 let rawScenario: unknown = phoneAppAdScenario;
-if (values.scenario) {
+if (values.template) {
+  const template = getTemplate(values.template);
+  if (!template) {
+    fail(`--template inconnu: "${values.template}". Disponibles: ${listTemplates().map((t) => t.id).join(", ")}`);
+  }
+  rawScenario = template.build({ format, ...(values.theme ? { themeId: values.theme } : {}) });
+} else if (values.scenario) {
   const scenarioPath = path.resolve(values.scenario);
   if (!existsSync(scenarioPath)) {
     fail(`Fichier de scénario introuvable: ${scenarioPath}`);
@@ -91,7 +105,7 @@ const propsPath = path.resolve("out", `.render-props-${Date.now()}.json`);
 writeFileSync(propsPath, JSON.stringify({ scenario }));
 
 console.log(`\n▶ Rendu ${compositionId} (${format}) — thème "${scenario.themeId}" — codec ${codec}`);
-console.log(`  scénario: ${values.scenario ?? "phone-app-ad (référence)"}`);
+console.log(`  scénario: ${values.template ? `template ${values.template}` : (values.scenario ?? "phone-app-ad (référence)")}`);
 console.log(`  sortie:   ${outPath}\n`);
 
 const renderResult = spawnSync(

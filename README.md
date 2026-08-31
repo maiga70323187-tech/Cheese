@@ -71,6 +71,17 @@ Voir `src/scenario/schema.ts` pour le schéma Zod complet et
 `src/scenario/examples/phone-app-ad.ts` pour un exemple correspondant au
 brief produit de référence.
 
+## Templates (structures prêtes)
+
+`src/templates/` fournit 6 structures narratives réutilisables
+(`product-launch`, `animated-infographic`, `saas-explainer`, `app-demo`,
+`social-ad`, `data-report`) : chacune donne un scénario validé prêt à
+rendre + un prompt de départ + une checklist d'assets. Voir `TEMPLATES.md`.
+
+```bash
+pnpm exec tsx src/cli/render.ts --composition VideoSquare --template animated-infographic --out out/demo.mp4
+```
+
 ## Conversion langage naturel → scénario (Kimi K2)
 
 `src/scenario/brief-to-scenario.ts` expose `BriefToScenarioClient`
@@ -125,8 +136,9 @@ produire des octets identiques) — voir `src/remotion/mount.test.ts`.
 
 - `ARCHITECTURE.md` — architecture, décisions techniques et pourquoi.
 - `DESIGN_SYSTEM.md` — schéma de charte, presets, comment en ajouter une.
-- `SCENES.md` — catalogue des scènes du moteur, y compris la scène
-  téléphone 2.5D/3D, `icon-showcase` et `asset-showcase`.
+- `SCENES.md` — catalogue des scènes du moteur (téléphone 2.5D/3D,
+  `icon-showcase`, `asset-showcase`, graphiques `bar/line/comparison`).
+- `TEMPLATES.md` — bibliothèque de templates (structures narratives prêtes).
 - `ASSETS.md` — pipeline de résolution logos/visages/illustrations.
 - `RENDERING.md` — pipeline de rendu MP4/GIF, CLI, licences.
 - `TROUBLESHOOTING.md` — problèmes réels rencontrés et leurs solutions.

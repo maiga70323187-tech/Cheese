@@ -12,6 +12,9 @@ import { PhoneShowcase } from "./scenes/PhoneShowcase";
 import { PhoneShowcase3D } from "./scenes/PhoneShowcase3D";
 import { IconShowcase3D } from "./scenes/IconShowcase3D";
 import { AssetShowcase } from "./scenes/AssetShowcase";
+import { BarChart } from "./charts/BarChart";
+import { LineChart } from "./charts/LineChart";
+import { Comparison } from "./charts/Comparison";
 
 /** The single place mapping a scenario scene type to its React component. */
 export function renderScene(scene: Scene, theme: BrandTheme): React.ReactElement {
@@ -53,6 +56,20 @@ export function renderScene(scene: Scene, theme: BrandTheme): React.ReactElement
         entityKind: scene.entityKind,
         label: scene.label,
         caption: scene.caption,
+      });
+    case "bar-chart":
+      return React.createElement(BarChart, { theme, title: scene.title, data: scene.data, unit: scene.unit, source: scene.source });
+    case "line-chart":
+      return React.createElement(LineChart, { theme, title: scene.title, data: scene.data, unit: scene.unit, source: scene.source });
+    case "comparison":
+      return React.createElement(Comparison, {
+        theme,
+        title: scene.title,
+        before: scene.before,
+        after: scene.after,
+        unit: scene.unit,
+        betterWhen: scene.betterWhen,
+        source: scene.source,
       });
     default: {
       const exhaustiveCheck: never = scene;

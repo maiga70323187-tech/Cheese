@@ -39,6 +39,7 @@ Ces scripts appellent `src/cli/render.ts` (via `tsx`), qui :
 pnpm exec tsx src/cli/render.ts \
   --composition VideoVertical \        # VideoVertical | VideoLandscape | VideoSquare
   --scenario chemin/vers/scenario.json \  # { "scenario": {...} } conforme à scenarioSchema — défaut: phone-app-ad
+  --template animated-infographic \    # part d'un template (exclusif avec --scenario) — voir TEMPLATES.md
   --theme premium-tech \               # force scenario.themeId
   --out out/ma-video.mp4 \             # défaut: out/<composition>.<mp4|gif>
   --gif                                # exporte en GIF (codec gif) au lieu de MP4 (h264)

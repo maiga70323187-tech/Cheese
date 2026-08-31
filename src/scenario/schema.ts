@@ -98,6 +98,44 @@ export const iconShowcaseSceneSchema = z.object({
   shape: z.enum(["ring", "diamond", "facet"]).default("ring"),
 });
 
+/** Un point de donnée nommé pour les scènes graphiques (valeur numérique brute, jamais pré-formatée). */
+export const dataPointSchema = z.object({
+  label: z.string().min(1),
+  value: z.number(),
+});
+
+export const barChartSceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("bar-chart"),
+  title: z.string().optional(),
+  data: z.array(dataPointSchema).min(2).max(8),
+  /** Suffixe d'unité affiché après chaque valeur (ex: "%", "K€"). */
+  unit: z.string().optional(),
+  /** Note de source affichée en bas — Hera recommande de toujours créditer la donnée. */
+  source: z.string().optional(),
+});
+
+export const lineChartSceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("line-chart"),
+  title: z.string().optional(),
+  data: z.array(dataPointSchema).min(2).max(24),
+  unit: z.string().optional(),
+  source: z.string().optional(),
+});
+
+export const comparisonSceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("comparison"),
+  title: z.string().optional(),
+  before: dataPointSchema,
+  after: dataPointSchema,
+  unit: z.string().optional(),
+  /** Sens de l'amélioration : "higher" (par défaut) ou "lower" (ex: un temps qui baisse est positif). Pilote la couleur du badge. */
+  betterWhen: z.enum(["higher", "lower"]).default("higher"),
+  source: z.string().optional(),
+});
+
 export const assetShowcaseSceneSchema = z.object({
   ...baseScene,
   type: z.literal("asset-showcase"),
@@ -127,6 +165,9 @@ export const sceneSchema = z.discriminatedUnion("type", [
   callToActionSceneSchema,
   iconShowcaseSceneSchema,
   assetShowcaseSceneSchema,
+  barChartSceneSchema,
+  lineChartSceneSchema,
+  comparisonSceneSchema,
   outroSceneSchema,
 ]);
 

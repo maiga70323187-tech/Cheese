@@ -1,10 +1,11 @@
 # Scènes
 
-> Statut : les 7 scènes 2D (Checkpoint B), la scène `phone-showcase`
-> (2.5D + 3D, Checkpoint C), la scène `icon-showcase` (3D) et la scène
-> `asset-showcase` (2.5D, logos/visages/illustrations résolus — voir
-> `ASSETS.md`) sont livrées et vérifiées par un rendu réel (voir
-> `ARCHITECTURE.md` pour la méthode de vérification).
+> Statut : les 7 scènes 2D (Checkpoint B), `phone-showcase` (2.5D + 3D),
+> `icon-showcase` (3D), `asset-showcase` (2.5D, logos/visages/illustrations
+> — voir `ASSETS.md`) et les 3 scènes graphiques (`bar-chart`,
+> `line-chart`, `comparison`) sont livrées et vérifiées par un rendu réel
+> (voir `ARCHITECTURE.md`). Les scènes s'assemblent en vidéos complètes via
+> la bibliothèque de templates (voir `TEMPLATES.md`).
 
 Chaque scène est un composant React sous `src/engine/scenes/`, mappé depuis
 `scene.type` par `src/engine/registry.ts`. Une scène ne reçoit **que**:
@@ -32,6 +33,9 @@ la frame courante).
 | `call-to-action` | `CallToAction` | `title`, `subtitle?`, `buttonLabel` | Bouton avec halo pulsé (`oscillate`) |
 | `icon-showcase` | `IconShowcase3D` | `shape` (`ring`/`diamond`/`facet`) | 3D, un seul mark abstrait en plateau tournant, voir plus bas |
 | `asset-showcase` | `AssetShowcase` | `src`, `entityKind`, `label?`, `caption?` | 2.5D, anime un logo/visage/illustration résolu, voir plus bas |
+| `bar-chart` | `BarChart` | `data[]`, `title?`, `unit?`, `source?` | Barres verticales animées (SVG), voir "Graphiques" |
+| `line-chart` | `LineChart` | `data[]`, `title?`, `unit?`, `source?` | Courbe tracée progressivement (SVG), voir "Graphiques" |
+| `comparison` | `Comparison` | `before`, `after`, `betterWhen?`, `unit?`, `source?` | Avant/après avec badge de variation, voir "Graphiques" |
 | `outro` | `Outro` | `title?`, `logoText?` | Écran de clôture sobre |
 
 ## Le fond premium (`PremiumBackground`)
@@ -200,6 +204,36 @@ local et URL, tous exercés.
 
 Pour brancher un vrai logo/visage sans passer par la résolution en ligne :
 déposer le fichier dans `public/` et référencer son chemin dans `src`.
+
+## Graphiques animés (`bar-chart`, `line-chart`, `comparison`)
+
+`src/engine/charts/` — trois scènes pilotées par **données** (valeurs
+numériques brutes, jamais pré-formatées), pour le pilier « infographies »
+(voir la feuille de route Hera). Habillage commun via
+`chart-common.tsx` (`ChartFrame` : fond premium + titre + **note de source**
+— Hera insiste sur le crédit systématique de la donnée). Toutes les
+animations sont des fonctions pures de `useCurrentFrame()`, donc
+déterministes.
+
+- **`bar-chart`** (`BarChart.tsx`) — barres verticales en **SVG**
+  (géométrie et libellés alignés au pixel) ; chaque barre pousse en décalé
+  depuis la ligne de base, sa valeur compte jusqu'au chiffre final, la
+  dernière barre est mise en avant. `data: {label, value}[]` (2 à 8),
+  `unit?`, `source?`.
+- **`line-chart`** (`LineChart.tsx`) — courbe **tracée progressivement** de
+  gauche à droite (chemin partiel recalculé à chaque frame), aire
+  semi-transparente, point mobile en tête affichant la valeur courante,
+  grille discrète. `data` (2 à 24 points), `unit?`, `source?`.
+- **`comparison`** (`Comparison.tsx`) — deux colonnes avant/après dont les
+  barres montent et les valeurs comptent, plus un **badge de variation**
+  en %. `betterWhen: "higher" | "lower"` (défaut `higher`) pilote la
+  couleur du badge : une baisse peut être positive (ex. un temps de
+  production), donc la sémantique n'est jamais devinée — elle est déclarée.
+
+Les valeurs sont des `number` (pas des chaînes) ; le formatage (unité,
+décimales) est géré par `formatValue`/`decimalsFor`. **Vérifier
+humainement** les données avant publication (recommandation Hera reprise
+telle quelle).
 
 ## Vérification réelle (pas seulement `tsc`)
 
