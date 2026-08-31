@@ -1,9 +1,10 @@
 # Scènes
 
 > Statut : les 7 scènes 2D (Checkpoint B), la scène `phone-showcase`
-> (2.5D + 3D, Checkpoint C) et la scène `icon-showcase` (3D, ajoutée après
-> analyse du corpus de références) sont livrées et vérifiées par un rendu
-> réel (voir `ARCHITECTURE.md` pour la méthode de vérification).
+> (2.5D + 3D, Checkpoint C), la scène `icon-showcase` (3D) et la scène
+> `asset-showcase` (2.5D, logos/visages/illustrations résolus — voir
+> `ASSETS.md`) sont livrées et vérifiées par un rendu réel (voir
+> `ARCHITECTURE.md` pour la méthode de vérification).
 
 Chaque scène est un composant React sous `src/engine/scenes/`, mappé depuis
 `scene.type` par `src/engine/registry.ts`. Une scène ne reçoit **que**:
@@ -30,6 +31,7 @@ la frame courante).
 | `statistic` | `Statistic` | `value`, `label`, `trend?` | Compteur animé si `value` est numérique (`+42%`, `128`, ...) |
 | `call-to-action` | `CallToAction` | `title`, `subtitle?`, `buttonLabel` | Bouton avec halo pulsé (`oscillate`) |
 | `icon-showcase` | `IconShowcase3D` | `shape` (`ring`/`diamond`/`facet`) | 3D, un seul mark abstrait en plateau tournant, voir plus bas |
+| `asset-showcase` | `AssetShowcase` | `src`, `entityKind`, `label?`, `caption?` | 2.5D, anime un logo/visage/illustration résolu, voir plus bas |
 | `outro` | `Outro` | `title?`, `logoText?` | Écran de clôture sobre |
 
 ## Le fond premium (`PremiumBackground`)
@@ -169,6 +171,35 @@ Contrairement au cadrage caméra du téléphone (qui avait nécessité un
 réglage empirique de la distance, voir `TROUBLESHOOTING.md`), la distance
 théorique (`fov: 30`, `position.z: 6.2`) a fonctionné dès le premier rendu
 réel pour les trois formes — vérifié visuellement, pas seulement supposé.
+
+## Scène asset (`asset-showcase`)
+
+`src/engine/scenes/AssetShowcase.tsx` anime en 2.5D un **asset visuel déjà
+résolu** — logo de marque, photo de personne détourée, ou illustration
+sous licence — sur le fond premium :
+
+- **entrée** `useEntrance` (pilotée par `theme.motion`), plus un léger
+  flottement + parallaxe déterministes (`oscillate`, fonction pure de la
+  frame) et un halo `theme.colors.primary` qui se détache toujours du fond ;
+- **source** (`src`) : soit un chemin `public/` (servi par `staticFile`),
+  soit une URL absolue — les deux gérés via `<Img>` de Remotion ; un vrai
+  logo **SVG** s'anime parfaitement par cette voie ;
+- **cadrage selon `entityKind`** :
+  - `brand` → logo contenu (jamais rogné), fond transparent, halo doux ;
+  - `person` → portrait en médaillon **circulaire** rogné + anneau lumineux ;
+  - `illustration` → image en carte arrondie, légèrement plus grande ;
+- **`label` / `caption`** en typographie du thème — la légende porte
+  l'attribution (auteur + licence CC) que la résolution propage.
+
+La résolution en ligne (Brandfetch / Wikimedia / Openverse) se fait **en
+amont** du rendu et écrit `src` dans le scénario — voir `ASSETS.md`. La
+scène, elle, est vérifiée par de vrais rendus avec assets locaux
+(`public/assets/sample-logo.svg` pour un logo SVG, `sample-portrait.png`
+pour un PNG transparent), pour les trois cadrages — SVG et PNG, chemin
+local et URL, tous exercés.
+
+Pour brancher un vrai logo/visage sans passer par la résolution en ligne :
+déposer le fichier dans `public/` et référencer son chemin dans `src`.
 
 ## Vérification réelle (pas seulement `tsc`)
 

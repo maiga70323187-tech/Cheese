@@ -38,6 +38,8 @@ const SCENE_TYPES_DOC = `
 - feature-cards { items: { title: string, description: string, icon?: string }[] (1 à 4 items) }
 - statistic { value: string, label: string, trend?: "up"|"down"|"flat" }
 - call-to-action { title: string, subtitle?: string, buttonLabel: string }
+- icon-showcase { shape?: "ring"|"diamond"|"facet" }
+- asset-showcase { src: string (chemin public/ ou URL d'un asset résolu), entityKind?: "brand"|"person"|"illustration", label?: string, caption?: string }
 - outro { title?: string, logoText?: string }
 `.trim();
 
@@ -62,7 +64,7 @@ Contraintes impératives:
 - La somme des "durationInSeconds" de chaque scène DOIT être égale à "durationInSeconds" du scénario (tolérance 0.05s).
 - "themeId" doit être l'un des identifiants suivants:
 - ${themeIds}
-- Chaque scène a un champ "type" parmi: intro, text-reveal, dashboard-showcase, phone-showcase, feature-cards, statistic, call-to-action, outro.
+- Chaque scène a un champ "type" parmi: intro, text-reveal, dashboard-showcase, phone-showcase, feature-cards, statistic, call-to-action, icon-showcase, asset-showcase, outro.
 - Champs disponibles par type de scène:
 ${SCENE_TYPES_DOC}
 - Choisis un enchaînement de scènes cohérent avec la demande (généralement: intro -> contenu -> call-to-action, avec outro optionnel).

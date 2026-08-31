@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { entityKindSchema } from "../assets/schema";
 
 export const videoFormatSchema = z.enum(["vertical", "landscape", "square"]);
 export type VideoFormat = z.infer<typeof videoFormatSchema>;
@@ -97,6 +98,25 @@ export const iconShowcaseSceneSchema = z.object({
   shape: z.enum(["ring", "diamond", "facet"]).default("ring"),
 });
 
+export const assetShowcaseSceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("asset-showcase"),
+  /**
+   * Référence de l'asset DÉJÀ résolu : soit un chemin `public/` (servi par
+   * `staticFile`), soit une URL absolue. La résolution (Brandfetch /
+   * Wikimedia / Openverse, voir `src/assets/`) se fait EN AMONT du rendu et
+   * écrit ce champ dans le scénario — le rendu reste ainsi déterministe et
+   * testable hors-ligne. Voir ASSETS.md.
+   */
+  src: z.string().min(1),
+  /** Famille d'entité : pilote le cadrage (logo contenu / portrait circulaire / illustration). */
+  entityKind: entityKindSchema.default("illustration"),
+  /** Titre affiché (nom de marque/personne, ou intitulé). */
+  label: z.string().optional(),
+  /** Légende / crédit (attribution CC pour une illustration ou une photo). */
+  caption: z.string().optional(),
+});
+
 export const sceneSchema = z.discriminatedUnion("type", [
   introSceneSchema,
   textRevealSceneSchema,
@@ -106,6 +126,7 @@ export const sceneSchema = z.discriminatedUnion("type", [
   statisticSceneSchema,
   callToActionSceneSchema,
   iconShowcaseSceneSchema,
+  assetShowcaseSceneSchema,
   outroSceneSchema,
 ]);
 

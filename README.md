@@ -59,9 +59,11 @@ pas se télécharger (environnements réseau restreints).
 
 ## Charte graphique (données, pas de code en dur)
 
-Voir `DESIGN_SYSTEM.md`. Cinq presets livrés : `luxury-dark`,
-`premium-tech`, `minimal-light`, `editorial`, `vibrant-startup`
-(`src/brand/presets`).
+Voir `DESIGN_SYSTEM.md`. Sept presets livrés : `luxury-dark`,
+`premium-tech`, `minimal-light`, `editorial`, `vibrant-startup`,
+`crimson-glow`, `emerald-glow` (`src/brand/presets`). Les polices sont
+réellement embarquées (`public/fonts/`, OFL) et chargées au rendu sans
+appel réseau — voir la section "Polices embarquées" de `DESIGN_SYSTEM.md`.
 
 ## Scénario JSON
 
@@ -95,15 +97,26 @@ distant bloque `api.tokenrouter.com` — voir `TROUBLESHOOTING.md#appel-kimi-k2-
 pour tester en dehors de ce sandbox et pour retrouver l'identifiant exact
 du modèle (`KIMI_MODEL`).
 
+## Résolution d'assets (logos, visages, illustrations)
+
+`src/assets/` transforme une entité nommée dans un prompt (marque,
+personne, concept) en asset visuel — logo SVG (Brandfetch), photo détourée
+(Wikimedia + rembg), illustration CC (Openverse) — animé par la scène
+`asset-showcase`. Même patron que le client Kimi (interfaces + clients
+câblés aux vraies URLs + `fetchImpl` injectable pour des tests hors-ligne).
+La résolution a lieu **en amont** du rendu (le rendu reste déterministe).
+Voir `ASSETS.md` (config, limite réseau du sandbox, note juridique).
+
 ## Tests
 
 ```bash
 pnpm test
 ```
 
-36 tests : validation des schémas (charte, scénario), client Kimi K2
-(fetch simulé, déterministe), PRNG déterministe et données de dashboard,
-compilation TypeScript, **et un rendu réel** de chaque composition
+56 tests : validation des schémas (charte, scénario), client Kimi K2 et
+clients de résolution d'assets (fetch simulé, déterministe), polices
+embarquées, PRNG déterministe et données de dashboard, compilation
+TypeScript, **et un rendu réel** de chaque composition
 (`VideoVertical`/`Landscape`/`Square`, dimensions/fps vérifiés) plus un
 contrôle de déterminisme automatisé (deux rendus de la même frame doivent
 produire des octets identiques) — voir `src/remotion/mount.test.ts`.
@@ -113,6 +126,7 @@ produire des octets identiques) — voir `src/remotion/mount.test.ts`.
 - `ARCHITECTURE.md` — architecture, décisions techniques et pourquoi.
 - `DESIGN_SYSTEM.md` — schéma de charte, presets, comment en ajouter une.
 - `SCENES.md` — catalogue des scènes du moteur, y compris la scène
-  téléphone 2.5D/3D et comment y brancher un modèle GLB.
+  téléphone 2.5D/3D, `icon-showcase` et `asset-showcase`.
+- `ASSETS.md` — pipeline de résolution logos/visages/illustrations.
 - `RENDERING.md` — pipeline de rendu MP4/GIF, CLI, licences.
 - `TROUBLESHOOTING.md` — problèmes réels rencontrés et leurs solutions.
