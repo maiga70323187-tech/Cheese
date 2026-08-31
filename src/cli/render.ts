@@ -7,13 +7,14 @@ import { scenarioSchema, type VideoFormat } from "../scenario/schema";
 import { phoneAppAdScenario } from "../scenario/examples/phone-app-ad";
 import { getTemplate, listTemplates } from "../templates/index";
 
-const COMPOSITION_IDS = ["VideoVertical", "VideoLandscape", "VideoSquare"] as const;
+const COMPOSITION_IDS = ["VideoVertical", "VideoLandscape", "VideoSquare", "VideoPortrait"] as const;
 type CompositionId = (typeof COMPOSITION_IDS)[number];
 
 const COMPOSITION_TO_FORMAT: Record<CompositionId, VideoFormat> = {
   VideoVertical: "vertical",
   VideoLandscape: "landscape",
   VideoSquare: "square",
+  VideoPortrait: "portrait",
 };
 
 function fail(message: string): never {
@@ -34,6 +35,8 @@ Options:
   --theme <themeId>     Force scenario.themeId (ex: luxury-dark, premium-tech, minimal-light, editorial, vibrant-startup)
   --out <path>          Chemin de sortie (défaut: out/<composition>.<mp4|gif>)
   --gif                 Exporte un GIF (codec gif) au lieu d'un MP4 (codec h264)
+  --transparent         Exporte un MOV ProRes 4444 avec canal alpha (pour les
+                        scènes overlay à compositer sur une vidéo existante)
   -h, --help             Affiche cette aide
 `);
 }
@@ -46,6 +49,7 @@ const { values } = parseArgs({
     theme: { type: "string" },
     out: { type: "string" },
     gif: { type: "boolean", default: false },
+    transparent: { type: "boolean", default: false },
     help: { type: "boolean", short: "h", default: false },
   },
 });
@@ -96,32 +100,40 @@ if (!result.success) {
 }
 const scenario = result.data;
 
-const codec = values.gif ? "gif" : "h264";
-const extension = values.gif ? "gif" : "mp4";
+if (values.gif && values.transparent) {
+  fail("--gif et --transparent sont incompatibles (le GIF n'a pas de canal alpha ProRes).");
+}
+
+// --transparent => MOV ProRes 4444 avec canal alpha (pour les overlays à
+// compositer). ProRes exige des frames PNG (le JPEG par défaut n'a pas
+// d'alpha), d'où l'override --image-format=png. Voir RENDERING.md.
+const codec = values.transparent ? "prores" : values.gif ? "gif" : "h264";
+const extension = values.transparent ? "mov" : values.gif ? "gif" : "mp4";
 const outPath = values.out ? path.resolve(values.out) : path.resolve("out", `${compositionId}.${extension}`);
 mkdirSync(path.dirname(outPath), { recursive: true });
 
 const propsPath = path.resolve("out", `.render-props-${Date.now()}.json`);
 writeFileSync(propsPath, JSON.stringify({ scenario }));
 
-console.log(`\n▶ Rendu ${compositionId} (${format}) — thème "${scenario.themeId}" — codec ${codec}`);
+console.log(`\n▶ Rendu ${compositionId} (${format}) — thème "${scenario.themeId}" — codec ${codec}${values.transparent ? " (alpha)" : ""}`);
 console.log(`  scénario: ${values.template ? `template ${values.template}` : (values.scenario ?? "phone-app-ad (référence)")}`);
 console.log(`  sortie:   ${outPath}\n`);
 
-const renderResult = spawnSync(
-  "pnpm",
-  [
-    "exec",
-    "remotion",
-    "render",
-    "src/remotion/index.ts",
-    compositionId,
-    outPath,
-    `--props=${propsPath}`,
-    `--codec=${codec}`,
-  ],
-  { stdio: "inherit" },
-);
+const renderArgs = [
+  "exec",
+  "remotion",
+  "render",
+  "src/remotion/index.ts",
+  compositionId,
+  outPath,
+  `--props=${propsPath}`,
+  `--codec=${codec}`,
+];
+if (values.transparent) {
+  renderArgs.push("--prores-profile=4444", "--image-format=png", "--pixel-format=yuva444p10le");
+}
+
+const renderResult = spawnSync("pnpm", renderArgs, { stdio: "inherit" });
 
 rmSync(propsPath, { force: true });
 

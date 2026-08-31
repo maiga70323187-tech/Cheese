@@ -76,3 +76,29 @@ describe("scènes graphiques", () => {
     expect(wrap({ type: "bar-chart", data: [{ label: "A", value: "beaucoup" }, { label: "B", value: 2 }] }).success).toBe(false);
   });
 });
+
+describe("scènes overlay et format 4:5", () => {
+  function wrap(scene: Record<string, unknown>, format = "landscape") {
+    return safeParseScenario({ format, fps: 30, durationInSeconds: 2, themeId: "premium-tech", scenes: [{ durationInSeconds: 2, ...scene }] });
+  }
+
+  it("accepte les 4 scènes overlay bien formées", () => {
+    expect(wrap({ type: "lower-third", title: "Marie" }).success).toBe(true);
+    expect(wrap({ type: "quote-card", quote: "Génial" }).success).toBe(true);
+    expect(wrap({ type: "callout", text: "Nouveau" }).success).toBe(true);
+    expect(wrap({ type: "stat-overlay", value: "+62%", label: "conversion" }).success).toBe(true);
+  });
+
+  it("applique la position par défaut de chaque overlay", () => {
+    const res = wrap({ type: "lower-third", title: "X" });
+    expect(res.success && res.data.scenes[0]!.type === "lower-third" && res.data.scenes[0]!.position).toBe("bottom-left");
+  });
+
+  it("rejette une position invalide", () => {
+    expect(wrap({ type: "callout", text: "x", position: "middle" }).success).toBe(false);
+  });
+
+  it("accepte le format portrait (4:5)", () => {
+    expect(wrap({ type: "lower-third", title: "X" }, "portrait").success).toBe(true);
+  });
+});

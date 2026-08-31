@@ -24,7 +24,14 @@ const PREINSTALLED_HEADLESS_SHELL = "/opt/pw-browsers/chromium_headless_shell-11
 const browserExecutable =
   process.env["REMOTION_BROWSER_EXECUTABLE"] ?? (existsSync(PREINSTALLED_HEADLESS_SHELL) ? PREINSTALLED_HEADLESS_SHELL : undefined);
 
-const COMPOSITIONS = ["VideoVertical", "VideoLandscape", "VideoSquare"] as const;
+const COMPOSITIONS = ["VideoVertical", "VideoLandscape", "VideoSquare", "VideoPortrait"] as const;
+
+const COMPOSITION_FORMAT = {
+  VideoVertical: "vertical",
+  VideoLandscape: "landscape",
+  VideoSquare: "square",
+  VideoPortrait: "portrait",
+} as const;
 
 describe("every main composition actually mounts and renders", () => {
   let serveUrl: string;
@@ -46,7 +53,7 @@ describe("every main composition actually mounts and renders", () => {
     async (id) => {
       const composition = await selectComposition({ serveUrl, id, browserExecutable });
 
-      const expected = FORMAT_DIMENSIONS[id === "VideoVertical" ? "vertical" : id === "VideoLandscape" ? "landscape" : "square"];
+      const expected = FORMAT_DIMENSIONS[COMPOSITION_FORMAT[id]];
       expect(composition.width).toBe(expected.width);
       expect(composition.height).toBe(expected.height);
       expect(composition.fps).toBe(30);

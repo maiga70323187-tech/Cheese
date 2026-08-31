@@ -3,8 +3,10 @@
 > Statut : les 7 scènes 2D (Checkpoint B), `phone-showcase` (2.5D + 3D),
 > `icon-showcase` (3D), `asset-showcase` (2.5D, logos/visages/illustrations
 > — voir `ASSETS.md`) et les 3 scènes graphiques (`bar-chart`,
-> `line-chart`, `comparison`) sont livrées et vérifiées par un rendu réel
-> (voir `ARCHITECTURE.md`). Les scènes s'assemblent en vidéos complètes via
+> `line-chart`, `comparison`) et les 4 scènes overlay transparentes
+> (`lower-third`, `quote-card`, `callout`, `stat-overlay`) sont livrées et
+> vérifiées par un rendu réel (voir `ARCHITECTURE.md`). Quatre formats
+> (9:16, 16:9, 1:1, 4:5). Les scènes s'assemblent en vidéos complètes via
 > la bibliothèque de templates (voir `TEMPLATES.md`).
 
 Chaque scène est un composant React sous `src/engine/scenes/`, mappé depuis
@@ -36,6 +38,10 @@ la frame courante).
 | `bar-chart` | `BarChart` | `data[]`, `title?`, `unit?`, `source?` | Barres verticales animées (SVG), voir "Graphiques" |
 | `line-chart` | `LineChart` | `data[]`, `title?`, `unit?`, `source?` | Courbe tracée progressivement (SVG), voir "Graphiques" |
 | `comparison` | `Comparison` | `before`, `after`, `betterWhen?`, `unit?`, `source?` | Avant/après avec badge de variation, voir "Graphiques" |
+| `lower-third` | `LowerThird` | `title`, `subtitle?`, `position?` | **Overlay** transparent, voir "Overlays" |
+| `quote-card` | `QuoteCard` | `quote`, `author?`, `position?` | **Overlay** transparent |
+| `callout` | `Callout` | `text`, `position?` | **Overlay** transparent (pastille d'accent) |
+| `stat-overlay` | `StatOverlay` | `value`, `label`, `position?` | **Overlay** transparent (stat en médaillon) |
 | `outro` | `Outro` | `title?`, `logoText?` | Écran de clôture sobre |
 
 ## Le fond premium (`PremiumBackground`)
@@ -234,6 +240,46 @@ Les valeurs sont des `number` (pas des chaînes) ; le formatage (unité,
 décimales) est géré par `formatValue`/`decimalsFor`. **Vérifier
 humainement** les données avant publication (recommandation Hera reprise
 telle quelle).
+
+## Overlays (`lower-third`, `quote-card`, `callout`, `stat-overlay`)
+
+`src/engine/overlays/` — scènes pensées pour être **superposées à une vidéo
+existante** (pilier §9 de Hera). Contrairement à toutes les autres scènes,
+elles ne peignent **aucun fond premium** : la frame est transparente, ce qui
+permet de les exporter en **MOV ProRes 4444 avec canal alpha**
+(`--transparent`, voir RENDERING.md) et de les compositer dans un autre
+outil de montage.
+
+Habillage commun via `overlay-common.tsx` :
+
+- `OverlayFrame` — `AbsoluteFill` transparent, élément ancré à un coin ou au
+  centre (`position`) avec des **marges de sécurité** (≈7% du plus petit
+  côté, comme le recommande Hera pour ne pas coller aux bords) ;
+- `useOverlayAnim` — **entrée puis sortie** temporisées (fondu + glissement)
+  calées sur la durée réelle de la `<Sequence>` de la scène, donc l'overlay
+  apparaît et disparaît proprement ;
+- `cardStyle` — fond de carte opaque (surface + ombre) pour rester lisible
+  sur n'importe quelle vidéo sous-jacente.
+
+Les quatre : `lower-third` (nom + rôle, liseré d'accent), `quote-card`
+(citation + auteur), `callout` (pastille d'accent compacte), `stat-overlay`
+(grande valeur + libellé en médaillon). `position` ∈ `bottom-left`,
+`bottom-right`, `top-left`, `top-right`, `bottom-center`.
+
+## Formats
+
+Quatre formats (`FORMAT_DIMENSIONS`, `src/scenario/schema.ts`) :
+
+| Format | Dimensions | Ratio | Usage |
+|---|---|---|---|
+| `vertical` | 1080×1920 | 9:16 | Reels, Shorts, TikTok |
+| `landscape` | 1920×1080 | 16:9 | Homepage, YouTube |
+| `square` | 1080×1080 | 1:1 | Post social |
+| `portrait` | 1080×1350 | 4:5 | Flux LinkedIn |
+
+Chaque format a sa composition Remotion (`VideoVertical`/`Landscape`/
+`Square`/`Portrait`) ; les dimensions dérivent du format, jamais codées en
+dur par composition.
 
 ## Vérification réelle (pas seulement `tsc`)
 

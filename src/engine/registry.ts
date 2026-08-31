@@ -15,6 +15,10 @@ import { AssetShowcase } from "./scenes/AssetShowcase";
 import { BarChart } from "./charts/BarChart";
 import { LineChart } from "./charts/LineChart";
 import { Comparison } from "./charts/Comparison";
+import { LowerThird } from "./overlays/LowerThird";
+import { QuoteCard } from "./overlays/QuoteCard";
+import { Callout } from "./overlays/Callout";
+import { StatOverlay } from "./overlays/StatOverlay";
 
 /** The single place mapping a scenario scene type to its React component. */
 export function renderScene(scene: Scene, theme: BrandTheme): React.ReactElement {
@@ -71,6 +75,14 @@ export function renderScene(scene: Scene, theme: BrandTheme): React.ReactElement
         betterWhen: scene.betterWhen,
         source: scene.source,
       });
+    case "lower-third":
+      return React.createElement(LowerThird, { theme, title: scene.title, subtitle: scene.subtitle, position: scene.position });
+    case "quote-card":
+      return React.createElement(QuoteCard, { theme, quote: scene.quote, author: scene.author, position: scene.position });
+    case "callout":
+      return React.createElement(Callout, { theme, text: scene.text, position: scene.position });
+    case "stat-overlay":
+      return React.createElement(StatOverlay, { theme, value: scene.value, label: scene.label, position: scene.position });
     default: {
       const exhaustiveCheck: never = scene;
       throw new Error(`Type de scène non géré: ${JSON.stringify(exhaustiveCheck)}`);

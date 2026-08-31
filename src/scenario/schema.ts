@@ -1,13 +1,14 @@
 import { z } from "zod";
 import { entityKindSchema } from "../assets/schema";
 
-export const videoFormatSchema = z.enum(["vertical", "landscape", "square"]);
+export const videoFormatSchema = z.enum(["vertical", "landscape", "square", "portrait"]);
 export type VideoFormat = z.infer<typeof videoFormatSchema>;
 
 export const FORMAT_DIMENSIONS: Record<VideoFormat, { width: number; height: number }> = {
-  vertical: { width: 1080, height: 1920 },
-  landscape: { width: 1920, height: 1080 },
-  square: { width: 1080, height: 1080 },
+  vertical: { width: 1080, height: 1920 }, // 9:16 — Reels/Shorts/TikTok
+  landscape: { width: 1920, height: 1080 }, // 16:9 — homepage/YouTube
+  square: { width: 1080, height: 1080 }, // 1:1 — post social
+  portrait: { width: 1080, height: 1350 }, // 4:5 — flux LinkedIn
 };
 
 const baseScene = {
@@ -136,6 +137,45 @@ export const comparisonSceneSchema = z.object({
   source: z.string().optional(),
 });
 
+/**
+ * Scènes OVERLAY — pensées pour être rendues sur fond TRANSPARENT (export
+ * MOV ProRes 4444, voir RENDERING.md) et superposées à une vidéo existante.
+ * Elles ne peignent aucun fond premium ; un élément positionné apparaît puis
+ * disparaît (entrée/sortie temporisées).
+ */
+const overlayPositionSchema = z.enum(["bottom-left", "bottom-right", "top-left", "top-right", "bottom-center"]);
+
+export const lowerThirdSceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("lower-third"),
+  title: z.string().min(1),
+  subtitle: z.string().optional(),
+  position: overlayPositionSchema.default("bottom-left"),
+});
+
+export const quoteCardSceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("quote-card"),
+  quote: z.string().min(1),
+  author: z.string().optional(),
+  position: overlayPositionSchema.default("bottom-center"),
+});
+
+export const calloutSceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("callout"),
+  text: z.string().min(1),
+  position: overlayPositionSchema.default("top-right"),
+});
+
+export const statOverlaySceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("stat-overlay"),
+  value: z.string().min(1),
+  label: z.string().min(1),
+  position: overlayPositionSchema.default("bottom-right"),
+});
+
 export const assetShowcaseSceneSchema = z.object({
   ...baseScene,
   type: z.literal("asset-showcase"),
@@ -168,6 +208,10 @@ export const sceneSchema = z.discriminatedUnion("type", [
   barChartSceneSchema,
   lineChartSceneSchema,
   comparisonSceneSchema,
+  lowerThirdSceneSchema,
+  quoteCardSceneSchema,
+  calloutSceneSchema,
+  statOverlaySceneSchema,
   outroSceneSchema,
 ]);
 

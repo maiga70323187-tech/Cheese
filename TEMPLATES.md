@@ -24,6 +24,7 @@ on part d'une intention professionnelle déjà mise en scène.
 | `app-demo` | 9:16 | 20 s | Un parcours mobile dans un mockup de téléphone |
 | `social-ad` | 9:16 | 12 s | Reels / Shorts / TikTok — hook, preuve, CTA |
 | `data-report` | 16:9 | 34 s | Résumé de rapport / mise à jour investisseurs |
+| `overlay-pack` | 16:9 | 12 s | Overlays à compositer (lower third, citation, callout, stat) — **exporter en `--transparent`** |
 
 Chaque entrée expose `id`, `name`, `description`, `recommendedFormat`,
 `recommendedDurationInSeconds`, `assetChecklist`, `startingPrompt` et

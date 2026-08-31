@@ -7,6 +7,7 @@ import type { VideoCompositionProps } from "./compositions/VideoComposition";
 import { VideoVertical } from "./compositions/VideoVertical";
 import { VideoLandscape } from "./compositions/VideoLandscape";
 import { VideoSquare } from "./compositions/VideoSquare";
+import { VideoPortrait } from "./compositions/VideoPortrait";
 
 /**
  * `z.custom` (rather than the full `scenarioSchema`) keeps `z.input` and
@@ -69,6 +70,13 @@ export const RemotionRoot: React.FC = () => (
       schema={compositionPropsSchema}
       defaultProps={{ scenario: phoneAppAdScenario }}
       calculateMetadata={({ props }) => computeMetadata(props.scenario, "square")}
+    />
+    <Composition<typeof compositionPropsSchema, VideoCompositionProps>
+      id="VideoPortrait"
+      component={VideoPortrait}
+      schema={compositionPropsSchema}
+      defaultProps={{ scenario: phoneAppAdScenario }}
+      calculateMetadata={({ props }) => computeMetadata(props.scenario, "portrait")}
     />
   </>
 );

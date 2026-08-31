@@ -36,15 +36,21 @@ pnpm typecheck      # tsc --noEmit sur tout le projet
 pnpm test           # suite Vitest (schémas, scénario, déterminisme)
 pnpm test:watch     # Vitest en mode watch
 
-pnpm studio         # Remotion Studio (prévisualisation) — VideoVertical/Landscape/Square
-pnpm render:vertical   # rendu MP4 1080x1920 (scénario phone-app-ad par défaut)
-pnpm render:landscape  # rendu MP4 1920x1080
-pnpm render:square     # rendu MP4 1080x1080
+pnpm studio         # Remotion Studio — VideoVertical/Landscape/Square/Portrait
+pnpm render:vertical   # rendu MP4 1080x1920 (9:16, scénario phone-app-ad par défaut)
+pnpm render:landscape  # rendu MP4 1920x1080 (16:9)
+pnpm render:square     # rendu MP4 1080x1080 (1:1)
 pnpm render:gif        # export GIF
 ```
 
+Quatre formats : `vertical` 9:16, `landscape` 16:9, `square` 1:1,
+`portrait` 4:5 (LinkedIn, composition `VideoPortrait`). Les scènes overlay
+(lower thirds, citations, callouts, stats) s'exportent en **MOV
+transparent** avec `--transparent`.
+
 Voir `RENDERING.md` pour les options du CLI de rendu (`--scenario`,
-`--theme`, `--out`, ...) et comment rendre un scénario JSON personnalisé.
+`--template`, `--theme`, `--transparent`, `--out`, ...) et comment rendre un
+scénario JSON personnalisé.
 
 Pour un contrôle rapide sans passer par le Studio, un rendu image fixe
 réel (pas seulement `tsc`) :

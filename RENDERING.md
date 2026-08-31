@@ -52,11 +52,31 @@ pnpm exec tsx src/cli/render.ts \
 - **Charte graphique** : `--theme <id>` sur le CLI, ou directement dans le
   JSON du scénario (`scenario.themeId`) — un des presets de
   `src/brand/presets` (voir `DESIGN_SYSTEM.md`).
-- **Format de sortie** : `--composition VideoVertical|VideoLandscape|VideoSquare`.
-  Le même scénario peut être rendu dans les trois formats sans
-  modification — `scenario.format` est écrasé automatiquement par le CLI
-  pour correspondre à la composition choisie (voir `Root.tsx`,
+- **Format de sortie** : `--composition VideoVertical|VideoLandscape|VideoSquare|VideoPortrait`
+  (9:16, 16:9, 1:1, 4:5). Le même scénario peut être rendu dans les quatre
+  formats sans modification — `scenario.format` est écrasé automatiquement
+  par le CLI pour correspondre à la composition choisie (voir `Root.tsx`,
   `calculateMetadata`).
+
+## Export transparent (overlays)
+
+Les scènes overlay (`lower-third`, `quote-card`, `callout`, `stat-overlay`)
+sont sur fond transparent, à compositer sur une vidéo existante. Pour les
+exporter avec canal alpha :
+
+```bash
+pnpm exec tsx src/cli/render.ts \
+  --composition VideoLandscape \
+  --scenario out/mes-overlays.json \
+  --transparent \
+  --out out/overlays.mov
+```
+
+`--transparent` produit un **MOV ProRes 4444** (`pixelFormat: yuva444p…le`,
+alpha vérifié). Il force `--image-format=png` en interne : le JPEG par
+défaut (`remotion.config.ts`) n'a pas de canal alpha. Incompatible avec
+`--gif` (le GIF n'a pas d'alpha ProRes). Le fichier est plus lourd qu'un
+MP4 (ProRes est peu compressé) — c'est normal pour un master à compositer.
 
 ## Rendre un scénario JSON personnalisé
 

@@ -189,6 +189,23 @@ const dataReport = defineTemplate({
   ],
 });
 
+const overlayPack = defineTemplate({
+  id: "overlay-pack",
+  name: "Pack d'overlays",
+  description: "Éléments animés à superposer sur une vidéo existante (lower thirds, citation, callout, stat). À exporter en MOV transparent (--transparent).",
+  recommendedFormat: "landscape",
+  recommendedDurationInSeconds: 12,
+  assetChecklist: ["Nom + rôle de l'intervenant", "Citation / définition à afficher", "Statistique à mettre en avant", "Couleurs de marque", "Zones sûres pour les sous-titres"],
+  startingPrompt:
+    "Crée un pack d'overlays de 12s au format 16:9 pour [VIDÉO]. Un lower third « [NOM] / [RÔLE] », une carte de citation, un callout, une stat animée. À compositer en transparence sur la vidéo existante.",
+  scenes: () => [
+    { type: "lower-third", durationInSeconds: 3, title: "[NOM]", subtitle: "[RÔLE]", position: "bottom-left" },
+    { type: "quote-card", durationInSeconds: 3, quote: "[CITATION À METTRE EN AVANT]", author: "[NOM]", position: "bottom-center" },
+    { type: "callout", durationInSeconds: 3, text: "[POINT CLÉ]", position: "top-right" },
+    { type: "stat-overlay", durationInSeconds: 3, value: "[+X%]", label: "[MÉTRIQUE]", position: "bottom-right" },
+  ],
+});
+
 export const videoTemplates: Record<string, VideoTemplate> = {
   [productLaunch.id]: productLaunch,
   [animatedInfographic.id]: animatedInfographic,
@@ -196,6 +213,7 @@ export const videoTemplates: Record<string, VideoTemplate> = {
   [appDemo.id]: appDemo,
   [socialAd.id]: socialAd,
   [dataReport.id]: dataReport,
+  [overlayPack.id]: overlayPack,
 };
 
 export function listTemplates(): VideoTemplate[] {
