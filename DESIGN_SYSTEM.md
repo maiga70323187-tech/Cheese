@@ -22,9 +22,11 @@ Défini dans `src/brand/schema.ts`, validé avec Zod. Champs :
   explicite** (`background`, `surface`, `text`, `primary`, `success`,
   `danger`, ...), jamais sous un nom générique (`color1`, `blue`). Toutes
   les valeurs sont des hex `#RRGGBB` validés par regex.
-- `typography` — `heading` / `body` / `label` (familles de police) +
-  `titleScale` (échelle de tailles, du plus grand titre au plus petit
-  label).
+- `typography` — `heading` / `body` / `label` (piles de polices CSS, ex.
+  `"'Space Grotesk', 'Inter', system-ui, sans-serif"`) + `titleScale`
+  (échelle de tailles, du plus grand titre au plus petit label). Voir
+  "Polices embarquées" plus bas : la première famille de chaque pile est
+  une vraie police `.woff2` livrée dans le repo, pas seulement un nom.
 - `spacing` — échelle d'espacement en pixels.
 - `radius` — `small` / `medium` / `large`.
 - `shadows` — `soft` / `elevated` / `glow` (chaînes CSS `box-shadow`).
@@ -60,6 +62,35 @@ identités rouge et verte absentes des 5 presets initiaux.
 Chaque preset est un objet TypeScript typé `BrandTheme` dans
 `src/brand/presets/*.ts`, réexporté via `getBrandTheme(themeId)` /
 `listBrandThemes()` (`src/brand/presets/index.ts`).
+
+## Polices embarquées
+
+Les polices sont **réellement livrées dans le repo** (`public/fonts/*.woff2`,
+sous-ensemble latin, licence OFL — voir `public/fonts/LICENSE.md`), pas
+seulement nommées dans les presets. Elles sont chargées au rendu par
+`src/brand/fonts.ts` (`ensureBrandFontsLoaded`, appelée dans
+`VideoComposition`) via l'API `FontFace` + `delayRender` de Remotion :
+aucun appel réseau au moment du rendu (déterminisme + compatibilité
+sandbox hors-ligne), et le rendu attend que les polices soient prêtes
+avant de capturer la première frame (pas de police système figée sur les
+premières images).
+
+Familles embarquées : **Inter** (400/600/700), **Space Grotesk** (500/700),
+**Playfair Display** (700), **Source Serif 4** (400/600), **IBM Plex Mono**
+(500).
+
+Les maquettes d'origine nommaient aussi des polices commerciales
+(Tiempos, Neue Haas Grotesk) ou hors Google Fonts (Clash Grotesk/Display,
+General Sans) : non embarquées pour raison de licence/d'accès, les presets
+concernés pointent désormais vers un équivalent OFL ci-dessus. Pour en
+ajouter une : déposer son `.woff2` licencié dans `public/fonts/`, l'ajouter
+à `BRAND_FONTS` (`src/brand/fonts.ts`) et mettre à jour le preset.
+
+`src/brand/fonts.test.ts` garantit en continu que (1) chaque fichier
+déclaré existe, (2) la première famille de chaque pile de preset est bien
+une police embarquée (jamais un nom non fourni qui retomberait
+silencieusement sur une police système), et (3) chaque pile finit par un
+fallback générique CSS.
 
 ## Test de lisibilité "jamais dans le noir"
 

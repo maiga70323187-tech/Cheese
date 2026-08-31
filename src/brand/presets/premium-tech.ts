@@ -21,9 +21,9 @@ export const premiumTech: BrandTheme = {
     danger: "#ff5c72",
   },
   typography: {
-    heading: "Space Grotesk",
-    body: "Inter",
-    label: "IBM Plex Mono",
+    heading: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+    body: "'Inter', system-ui, sans-serif",
+    label: "'IBM Plex Mono', ui-monospace, monospace",
     titleScale: [88, 60, 40, 28, 20],
   },
   spacing: [4, 8, 12, 20, 32, 48, 72, 104],

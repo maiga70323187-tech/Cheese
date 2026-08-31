@@ -21,9 +21,9 @@ export const editorial: BrandTheme = {
     danger: "#7a2331",
   },
   typography: {
-    heading: "Tiempos Headline",
-    body: "Tiempos Text",
-    label: "Inter",
+    heading: "'Playfair Display', Georgia, serif",
+    body: "'Source Serif 4', Georgia, serif",
+    label: "'Inter', system-ui, sans-serif",
     titleScale: [80, 56, 38, 26, 19],
   },
   spacing: [4, 8, 16, 28, 44, 64, 88],

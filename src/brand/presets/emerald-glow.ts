@@ -22,9 +22,9 @@ export const emeraldGlow: BrandTheme = {
     danger: "#ff6161",
   },
   typography: {
-    heading: "General Sans",
-    body: "Inter",
-    label: "IBM Plex Mono",
+    heading: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+    body: "'Inter', system-ui, sans-serif",
+    label: "'IBM Plex Mono', ui-monospace, monospace",
     titleScale: [86, 58, 40, 27, 20],
   },
   spacing: [4, 8, 12, 20, 32, 48, 72],

@@ -21,9 +21,9 @@ export const luxuryDark: BrandTheme = {
     danger: "#c0555a",
   },
   typography: {
-    heading: "Playfair Display",
-    body: "Inter",
-    label: "Inter",
+    heading: "'Playfair Display', Georgia, serif",
+    body: "'Inter', system-ui, sans-serif",
+    label: "'Inter', system-ui, sans-serif",
     titleScale: [96, 64, 44, 30, 22],
   },
   spacing: [4, 8, 16, 24, 32, 48, 64, 96],

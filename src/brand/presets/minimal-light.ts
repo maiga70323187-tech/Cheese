@@ -23,9 +23,9 @@ export const minimalLight: BrandTheme = {
     danger: "#b23a3a",
   },
   typography: {
-    heading: "Neue Haas Grotesk",
-    body: "Inter",
-    label: "Inter",
+    heading: "'Inter', system-ui, sans-serif",
+    body: "'Inter', system-ui, sans-serif",
+    label: "'Inter', system-ui, sans-serif",
     titleScale: [72, 52, 36, 24, 18],
   },
   spacing: [4, 8, 16, 24, 40, 56, 80],

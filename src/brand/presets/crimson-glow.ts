@@ -23,9 +23,9 @@ export const crimsonGlow: BrandTheme = {
     danger: "#ff3b4e",
   },
   typography: {
-    heading: "Clash Grotesk",
-    body: "Inter",
-    label: "Inter",
+    heading: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+    body: "'Inter', system-ui, sans-serif",
+    label: "'Inter', system-ui, sans-serif",
     titleScale: [92, 62, 42, 28, 20],
   },
   spacing: [4, 8, 16, 24, 36, 52, 76],
