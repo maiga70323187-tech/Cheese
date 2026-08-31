@@ -1,1 +1,150 @@
-# Cheese
+# Cheese — moteur SaaS de génération vidéo
+
+Transforme une demande en langage naturel en scénario JSON validé, puis en
+vidéo rendue par [Remotion](https://www.remotion.dev/), pilotée par une
+charte graphique elle-même validée par [Zod](https://zod.dev/) — jamais de
+couleur ou de style codé en dur dans une composition.
+
+> **Statut** : projet complet — charte graphique, scénario, conversion
+> NL → JSON via Kimi K2, moteur de scènes avec 7 compositions 2D **et**
+> la scène téléphone en 2.5D (CSS) et en vraie 3D (React Three Fiber +
+> `@remotion/three`), pipeline de rendu MP4/GIF, et suite de tests
+> complète (36 tests, dont des rendus réels automatisés) — voir
+> `ARCHITECTURE.md` pour le détail des décisions et `TROUBLESHOOTING.md`
+> pour les bugs réels trouvés et corrigés en cours de route.
+
+## Stack
+
+TypeScript strict · React 19 · Remotion 4 · React Three Fiber / Three.js ·
+Zod · Vitest · pnpm.
+
+## Prérequis
+
+- Node.js ≥ 18 (testé avec Node 22)
+- pnpm (`corepack enable` ou `npm i -g pnpm`)
+
+## Installation
+
+```bash
+pnpm install
+```
+
+## Commandes
+
+```bash
+pnpm typecheck      # tsc --noEmit sur tout le projet
+pnpm test           # suite Vitest (schémas, scénario, déterminisme)
+pnpm test:watch     # Vitest en mode watch
+
+pnpm studio         # Remotion Studio — VideoVertical/Landscape/Square/Portrait
+pnpm render:vertical   # rendu MP4 1080x1920 (9:16, scénario phone-app-ad par défaut)
+pnpm render:landscape  # rendu MP4 1920x1080 (16:9)
+pnpm render:square     # rendu MP4 1080x1080 (1:1)
+pnpm render:gif        # export GIF
+```
+
+Quatre formats : `vertical` 9:16, `landscape` 16:9, `square` 1:1,
+`portrait` 4:5 (LinkedIn, composition `VideoPortrait`). Les scènes overlay
+(lower thirds, citations, callouts, stats) s'exportent en **MOV
+transparent** avec `--transparent`.
+
+Voir `RENDERING.md` pour les options du CLI de rendu (`--scenario`,
+`--template`, `--theme`, `--transparent`, `--out`, ...) et comment rendre un
+scénario JSON personnalisé.
+
+Pour un contrôle rapide sans passer par le Studio, un rendu image fixe
+réel (pas seulement `tsc`) :
+
+```bash
+mkdir -p out
+pnpm exec remotion still src/remotion/index.ts VideoVertical out/check.png --frame=30
+```
+
+Voir `TROUBLESHOOTING.md` si le navigateur headless de Remotion ne peut
+pas se télécharger (environnements réseau restreints).
+
+## Charte graphique (données, pas de code en dur)
+
+Voir `DESIGN_SYSTEM.md`. Sept presets livrés : `luxury-dark`,
+`premium-tech`, `minimal-light`, `editorial`, `vibrant-startup`,
+`crimson-glow`, `emerald-glow` (`src/brand/presets`). Les polices sont
+réellement embarquées (`public/fonts/`, OFL) et chargées au rendu sans
+appel réseau — voir la section "Polices embarquées" de `DESIGN_SYSTEM.md`.
+
+## Scénario JSON
+
+Voir `src/scenario/schema.ts` pour le schéma Zod complet et
+`src/scenario/examples/phone-app-ad.ts` pour un exemple correspondant au
+brief produit de référence.
+
+## Templates (structures prêtes)
+
+`src/templates/` fournit 6 structures narratives réutilisables
+(`product-launch`, `animated-infographic`, `saas-explainer`, `app-demo`,
+`social-ad`, `data-report`) : chacune donne un scénario validé prêt à
+rendre + un prompt de départ + une checklist d'assets. Voir `TEMPLATES.md`.
+
+```bash
+pnpm exec tsx src/cli/render.ts --composition VideoSquare --template animated-infographic --out out/demo.mp4
+```
+
+## Conversion langage naturel → scénario (Kimi K2)
+
+`src/scenario/brief-to-scenario.ts` expose `BriefToScenarioClient`
+(interface) et `KimiBriefToScenarioClient` (implémentation réelle, API
+Kimi K2 de Moonshot AI, compatible OpenAI). Configuration par variables
+d'environnement :
+
+```bash
+export KIMI_API_KEY="..."                                # requis
+export KIMI_API_BASE_URL="https://api.moonshot.ai/v1"    # optionnel
+export KIMI_MODEL="kimi-k2-0711-preview"                 # optionnel
+```
+
+Sans `KIMI_API_KEY`, `convert()` lève une `BriefToScenarioError` explicite
+— aucun appel réseau silencieux. Les tests (`brief-to-scenario.test.ts`)
+n'appellent jamais le réseau réel : ils injectent un `fetchImpl` simulé
+pour rester déterministes.
+
+Un `.env` local (non commité, voir `.gitignore`) est déjà configuré pour
+ce projet avec `KIMI_API_KEY` et `KIMI_API_BASE_URL=https://api.tokenrouter.com/v1`
+(fournisseur tiers OpenAI-compatible vers Kimi K2). **Non testé en conditions
+réelles depuis cette session** : la politique réseau de cet environnement
+distant bloque `api.tokenrouter.com` — voir `TROUBLESHOOTING.md#appel-kimi-k2-bloqué-dans-une-session-claude-code-on-the-web`
+pour tester en dehors de ce sandbox et pour retrouver l'identifiant exact
+du modèle (`KIMI_MODEL`).
+
+## Résolution d'assets (logos, visages, illustrations)
+
+`src/assets/` transforme une entité nommée dans un prompt (marque,
+personne, concept) en asset visuel — logo SVG (Brandfetch), photo détourée
+(Wikimedia + rembg), illustration CC (Openverse) — animé par la scène
+`asset-showcase`. Même patron que le client Kimi (interfaces + clients
+câblés aux vraies URLs + `fetchImpl` injectable pour des tests hors-ligne).
+La résolution a lieu **en amont** du rendu (le rendu reste déterministe).
+Voir `ASSETS.md` (config, limite réseau du sandbox, note juridique).
+
+## Tests
+
+```bash
+pnpm test
+```
+
+56 tests : validation des schémas (charte, scénario), client Kimi K2 et
+clients de résolution d'assets (fetch simulé, déterministe), polices
+embarquées, PRNG déterministe et données de dashboard, compilation
+TypeScript, **et un rendu réel** de chaque composition
+(`VideoVertical`/`Landscape`/`Square`, dimensions/fps vérifiés) plus un
+contrôle de déterminisme automatisé (deux rendus de la même frame doivent
+produire des octets identiques) — voir `src/remotion/mount.test.ts`.
+
+## Documentation
+
+- `ARCHITECTURE.md` — architecture, décisions techniques et pourquoi.
+- `DESIGN_SYSTEM.md` — schéma de charte, presets, comment en ajouter une.
+- `SCENES.md` — catalogue des scènes du moteur (téléphone 2.5D/3D,
+  `icon-showcase`, `asset-showcase`, graphiques `bar/line/comparison`).
+- `TEMPLATES.md` — bibliothèque de templates (structures narratives prêtes).
+- `ASSETS.md` — pipeline de résolution logos/visages/illustrations.
+- `RENDERING.md` — pipeline de rendu MP4/GIF, CLI, licences.
+- `TROUBLESHOOTING.md` — problèmes réels rencontrés et leurs solutions.

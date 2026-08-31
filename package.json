@@ -1,0 +1,49 @@
+{
+  "name": "cheese",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Moteur SaaS de génération vidéo : texte en langage naturel -> scénario JSON -> vidéo Remotion",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "studio": "remotion studio src/remotion/index.ts",
+    "preview": "remotion studio src/remotion/index.ts",
+    "render:vertical": "tsx src/cli/render.ts --composition VideoVertical",
+    "render:landscape": "tsx src/cli/render.ts --composition VideoLandscape",
+    "render:square": "tsx src/cli/render.ts --composition VideoSquare",
+    "render:gif": "tsx src/cli/render.ts --gif",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.518",
+    "@remotion/renderer": "4.0.518",
+    "@remotion/three": "4.0.518",
+    "@remotion/zod-types": "4.0.518",
+    "@react-three/drei": "10.7.8",
+    "@react-three/fiber": "9.7.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.518",
+    "three": "0.185.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@remotion/bundler": "4.0.518",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.8",
+    "@types/react-dom": "19.2.5",
+    "@types/three": "0.185.0",
+    "tsx": "4.19.2",
+    "typescript": "5.7.3",
+    "vitest": "3.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
