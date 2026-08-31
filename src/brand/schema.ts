@@ -41,7 +41,7 @@ export const brandShadowsSchema = z.object({
   glow: z.string().min(1).optional(),
 });
 
-export const motionEntranceSchema = z.enum(["fade", "slide", "scale", "spring", "reveal"]);
+export const motionEntranceSchema = z.enum(["fade", "slide", "scale", "spring", "reveal", "kinetic"]);
 
 export const brandMotionSchema = z.object({
   entrance: motionEntranceSchema,

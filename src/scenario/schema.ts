@@ -90,6 +90,13 @@ export const outroSceneSchema = z.object({
   logoText: z.string().optional(),
 });
 
+export const iconShowcaseSceneSchema = z.object({
+  ...baseScene,
+  type: z.literal("icon-showcase"),
+  /** Abstract 3D mark shape — no brand asset required, swap for a GLB later (see SCENES.md). */
+  shape: z.enum(["ring", "diamond", "facet"]).default("ring"),
+});
+
 export const sceneSchema = z.discriminatedUnion("type", [
   introSceneSchema,
   textRevealSceneSchema,
@@ -98,6 +105,7 @@ export const sceneSchema = z.discriminatedUnion("type", [
   featureCardsSceneSchema,
   statisticSceneSchema,
   callToActionSceneSchema,
+  iconShowcaseSceneSchema,
   outroSceneSchema,
 ]);
 

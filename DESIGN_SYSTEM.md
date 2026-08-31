@@ -1,8 +1,10 @@
 # Design System — Charte graphique
 
-> Statut : schéma et presets figés (Checkpoint A). L'usage dans les
-> compositions (background premium, ombres, glow) sera documenté au fur et
-> à mesure des checkpoints suivants.
+> Statut : schéma et presets initiaux figés (Checkpoint A), complétés
+> après analyse du corpus de références par 2 nouveaux presets
+> (`crimson-glow`, `emerald-glow`) et une nouvelle option de mouvement
+> (`kinetic`). L'usage dans les compositions (background premium, ombres,
+> glow) est documenté au fur et à mesure des checkpoints suivants.
 
 ## Principe
 
@@ -26,8 +28,14 @@ Défini dans `src/brand/schema.ts`, validé avec Zod. Champs :
 - `spacing` — échelle d'espacement en pixels.
 - `radius` — `small` / `medium` / `large`.
 - `shadows` — `soft` / `elevated` / `glow` (chaînes CSS `box-shadow`).
-- `motion` — type d'entrée (`fade|slide|scale|spring|reveal`), durée en
-  frames, easing, et paramètres de spring optionnels.
+- `motion` — type d'entrée (`fade|slide|scale|spring|reveal|kinetic`),
+  durée en frames, easing, et paramètres de spring optionnels. `kinetic`
+  (ajouté après analyse du corpus de références) combine translation +
+  légère rotation + échelle sur un seul `spring()`, pour un effet plus
+  "punchy"/avec dépassement que `spring` seul (voir
+  `src/engine/motion.ts`, branche `useEntrance`) — disponible pour
+  n'importe quelle charte, pas seulement `crimson-glow` qui l'utilise par
+  défaut.
 - `background` — configuration du fond premium : type, dégradé de
   couleurs, `separationFromBlack` (0-1, distance mesurable par rapport au
   noir pur — voir `src/brand/schema.test.ts`), `vignette`, `grain`
@@ -42,6 +50,12 @@ Défini dans `src/brand/schema.ts`, validé avec Zod. Champs :
 | `minimal-light` | Minimaliste | Blanc cassé, quasi plat | `fade`, sobre |
 | `editorial` | Éditorial | Papier crème, encre, bordeaux | `slide`, lent |
 | `vibrant-startup` | Énergique / coloré | Violet profond, dégradé magenta/orange | `scale` rebondissant |
+| `crimson-glow` | Cinématique / intense | Noir profond, halo rouge, radial | `kinetic`, punchy |
+| `emerald-glow` | Néon / tech | Fond sombre, vert néon | `spring`, précis |
+
+`crimson-glow` et `emerald-glow` ont été ajoutés après analyse du corpus
+de références (images/vidéos fournies par l'utilisateur) pour couvrir des
+identités rouge et verte absentes des 5 presets initiaux.
 
 Chaque preset est un objet TypeScript typé `BrandTheme` dans
 `src/brand/presets/*.ts`, réexporté via `getBrandTheme(themeId)` /
@@ -50,8 +64,8 @@ Chaque preset est un objet TypeScript typé `BrandTheme` dans
 ## Test de lisibilité "jamais dans le noir"
 
 `src/brand/schema.test.ts` calcule la luminance relative WCAG du fond de
-chaque preset sombre (`luxury-dark`, `premium-tech`, `vibrant-startup`) et
-vérifie :
+chaque preset sombre (`luxury-dark`, `premium-tech`, `vibrant-startup`,
+`crimson-glow`, `emerald-glow`) et vérifie :
 
 1. qu'elle reste mesurablement au-dessus du noir pur (luminance > 0.01,
    alors qu'un noir absolu `#000000` vaut 0) ;

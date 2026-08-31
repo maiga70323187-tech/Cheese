@@ -53,7 +53,7 @@ describe("brandThemeSchema", () => {
 });
 
 describe("premium background never disappears into black", () => {
-  const darkPresetIds = ["luxury-dark", "premium-tech", "vibrant-startup"];
+  const darkPresetIds = ["luxury-dark", "premium-tech", "vibrant-startup", "crimson-glow", "emerald-glow"];
 
   it.each(darkPresetIds)("%s background stays measurably above pure black", (id) => {
     const theme = brandThemePresets[id]!;

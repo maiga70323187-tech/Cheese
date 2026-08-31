@@ -31,6 +31,25 @@ export function useEntrance(theme: BrandTheme, delayFrames = 0): EntranceStyle {
     };
   }
 
+  if (entrance === "kinetic") {
+    // Punchy slide + rotation with a spring overshoot/settle — the "card
+    // flips into place" energy from kinetic-typography reference footage
+    // (see ARCHITECTURE.md), as opposed to "spring"'s straight scale+lift.
+    const progress = spring({
+      frame: localFrame,
+      fps,
+      config: springConfig ?? { damping: 12, mass: 0.75, stiffness: 210 },
+      durationInFrames: durationFrames,
+    });
+    const translate = interpolate(progress, [0, 1], [70, 0]);
+    const rotate = interpolate(progress, [0, 1], [-10, 0]);
+    const scale = interpolate(progress, [0, 1], [0.88, 1]);
+    return {
+      opacity: interpolate(progress, [0, 1], [0, 1], { extrapolateRight: "clamp" }),
+      transform: `translateX(${translate}px) rotate(${rotate}deg) scale(${scale})`,
+    };
+  }
+
   const progress = interpolate(localFrame, [0, durationFrames], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",

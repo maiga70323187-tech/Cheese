@@ -1,8 +1,9 @@
 # Scènes
 
-> Statut : les 7 scènes 2D (Checkpoint B) et la scène `phone-showcase`
-> (2.5D + 3D, Checkpoint C) sont livrées et vérifiées par un rendu réel
-> (voir `ARCHITECTURE.md` pour la méthode de vérification).
+> Statut : les 7 scènes 2D (Checkpoint B), la scène `phone-showcase`
+> (2.5D + 3D, Checkpoint C) et la scène `icon-showcase` (3D, ajoutée après
+> analyse du corpus de références) sont livrées et vérifiées par un rendu
+> réel (voir `ARCHITECTURE.md` pour la méthode de vérification).
 
 Chaque scène est un composant React sous `src/engine/scenes/`, mappé depuis
 `scene.type` par `src/engine/registry.ts`. Une scène ne reçoit **que**:
@@ -28,6 +29,7 @@ la frame courante).
 | `feature-cards` | `FeatureCards` | `items[]` (1 à 4) | Cartes avec icône/titre/description, entrée en cascade |
 | `statistic` | `Statistic` | `value`, `label`, `trend?` | Compteur animé si `value` est numérique (`+42%`, `128`, ...) |
 | `call-to-action` | `CallToAction` | `title`, `subtitle?`, `buttonLabel` | Bouton avec halo pulsé (`oscillate`) |
+| `icon-showcase` | `IconShowcase3D` | `shape` (`ring`/`diamond`/`facet`) | 3D, un seul mark abstrait en plateau tournant, voir plus bas |
 | `outro` | `Outro` | `title?`, `logoText?` | Écran de clôture sobre |
 
 ## Le fond premium (`PremiumBackground`)
@@ -128,6 +130,45 @@ au lieu de `requestAnimationFrame`, condition nécessaire au déterminisme).
    (`remotion still`) que l'échelle et le cadrage restent corrects — un
    modèle importé a rarement les mêmes proportions que le placeholder
    procédural (voir l'entrée "cadrage caméra" de `TROUBLESHOOTING.md`).
+
+## Scène icône (`icon-showcase`)
+
+`src/engine/scenes/IconShowcase3D.tsx` (enveloppe `PremiumBackground` +
+`<ThreeCanvas>`, même structure que `PhoneShowcase3D.tsx`) monte
+`src/engine/icon/Icon3D.tsx` (`Icon3DScene`), inspirée des rendus d'icônes
+d'app glossy du corpus de références analysé (un seul objet, centré, sur un
+socle arrondi, reflets studio doux) :
+
+- **caméra/éclairage/matériaux** : recette identique à `Phone3DScene` —
+  `PerspectiveCamera` en `manual` avec `aspect` explicite (calculé depuis
+  `useVideoConfig()` et passé en prop, l'écran d'icône n'a pas d'écran de
+  téléphone à gérer donc pas besoin de `useVideoConfig()` en interne), même
+  rig 5 lumières déterministe, `meshPhysicalMaterial` avec `clearcoat`
+  (même look "plastique brillant" que le châssis du téléphone après la
+  mise à niveau des matériaux, voir `TROUBLESHOOTING.md`) ;
+- **le mark** : `torusGeometry` (`ring`), `octahedronGeometry` (`diamond`)
+  ou `icosahedronGeometry` (`facet`) — primitives Three.js standard, donc
+  aucun risque de géométrie dégénérée (contrairement au `RoundedBox` du
+  téléphone) ; plateau tournant (`rotation.y` fonction de `frame`) +
+  respiration verticale (`oscillate`), coloré par `theme.colors.primary` ;
+- **socle** : `RoundedBox` en retrait (`position.z = -0.55`), même
+  matériau clearcoat que le corps du téléphone, coloré par
+  `theme.colors.surface` ;
+- **entrée** : `scale` uniquement (0 → 1 sur 18 frames), jamais `opacity` —
+  même raison que `ScreenContent` du téléphone 3D (matériaux `transparent`
+  invisibles sous ce pipeline, voir `TROUBLESHOOTING.md`).
+
+C'est la scène 3D la plus simple du projet (pas d'écran à gérer) — donc la
+plus simple à faire pointer vers un vrai logo de marque : remplacer
+`<Mark shape={shape} />` par `<primitive object={gltf.scene} />` (via
+`useGLTF`) dans `Icon3D.tsx`, en gardant caméra/lumières/socle identiques
+(mêmes étapes que "Remplacer le téléphone procédural par un vrai modèle
+GLB" ci-dessus).
+
+Contrairement au cadrage caméra du téléphone (qui avait nécessité un
+réglage empirique de la distance, voir `TROUBLESHOOTING.md`), la distance
+théorique (`fov: 30`, `position.z: 6.2`) a fonctionné dès le premier rendu
+réel pour les trois formes — vérifié visuellement, pas seulement supposé.
 
 ## Vérification réelle (pas seulement `tsc`)
 

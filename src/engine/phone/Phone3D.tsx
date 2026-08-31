@@ -189,9 +189,20 @@ export const Phone3DScene: React.FC<Phone3DSceneProps> = ({ theme, dashboardVari
       <pointLight position={[-1.5, -0.5, 2.5]} intensity={rimIntensity} color={theme.colors.primary} distance={6} />
 
       <group rotation={[0.04, turntable, 0]} position={[0, bobbing, 0]}>
-        {/* Body */}
-        <RoundedBox args={[PHONE_WIDTH, PHONE_HEIGHT, PHONE_DEPTH]} radius={BODY_RADIUS} smoothness={6} castShadow receiveShadow>
-          <meshStandardMaterial color={theme.colors.surface} metalness={0.6} roughness={0.32} />
+        {/* Body — clearcoat gives the glossy "toy plastic" look from the
+            reference 3D icon renders (single object, soft rounded
+            highlights) rather than the flatter meshStandardMaterial look
+            this had before; RoundedBox smoothness bumped so those
+            highlights land on clean, evenly-subdivided geometry. */}
+        <RoundedBox args={[PHONE_WIDTH, PHONE_HEIGHT, PHONE_DEPTH]} radius={BODY_RADIUS} smoothness={8} castShadow receiveShadow>
+          <meshPhysicalMaterial
+            color={theme.colors.surface}
+            metalness={0.5}
+            roughness={0.22}
+            clearcoat={1}
+            clearcoatRoughness={0.12}
+            reflectivity={0.5}
+          />
         </RoundedBox>
 
         {/* Screen backing. */}
@@ -217,7 +228,7 @@ export const Phone3DScene: React.FC<Phone3DSceneProps> = ({ theme, dashboardVari
         <RoundedBox
           args={[screenInnerWidth * 1.01, screenInnerHeight * 1.01, GLASS_THICKNESS]}
           radius={GLASS_RADIUS}
-          smoothness={4}
+          smoothness={6}
           position={[0, 0, PHONE_DEPTH / 2 + 0.02 + GLASS_THICKNESS / 2]}
         >
           <meshPhysicalMaterial
